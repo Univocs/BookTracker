@@ -1,6 +1,30 @@
 @BookTracker.Api_HostAddress = http://localhost:5015
 
 ### Get Books
-GET http://localhost:5000/books
+GET http://localhost:5015/books
+
+###
+
+### Create Book
+POST http://localhost:5015/books
+Content-Type: application/json
+
+{
+  "title": "Dune",
+  "author": "Frank Herbert",
+  "year": 1965
+}
+
+###
+
+### Create Book
+POST http://localhost:5015/books
+Content-Type: application/json
+
+{
+  "title": "Tender Is the Night",
+  "author": "F. Scott Fitzgerald",
+  "year": 1934
+}
 
 ###
