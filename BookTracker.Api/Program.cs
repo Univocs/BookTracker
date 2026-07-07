@@ -1,9 +1,7 @@
 using BookTracker.Api.Application;
-using BookTracker.Api.Application.CreateBook;
-using BookTracker.Api.Application.GetBookById;
-using BookTracker.Api.Application.UpdateBook;
 using BookTracker.Api.Storage;
 using Microsoft.EntityFrameworkCore;
+using BookTracker.Api.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args); // create builder for WebApplication
 
@@ -31,40 +29,8 @@ if (app.Environment.IsDevelopment())
   }
 }
 
-app.MapGet("/books", async (BookService service) => Results.Ok(await service.GetAllBooks()));
-// Use bookservice to await GetAllBooks()
-
-app.MapPost("/books", async (CreateBookRequest request, BookService service) =>
-{
-  var response = await service.CreateBook(request);
-  return Results.Created($"/books/{response.Id}", response);
-});
-
-app.MapDelete("/books/{id:int}", async (int id, BookService service) =>
-{
-  var deleted = await service.DeleteBook(id);
-  if (!deleted) return Results.NotFound();
-  // If book doesn't exist => API can not delete anything, so NotFound()
-  return Results.NoContent();
-  // Why NoContent()? Because we don't need a response, we already did service.DeleteBook(id);
-});
-
-app.MapPut("/books/{id:int}", async (int id, UpdateBookRequest request, BookService service) =>
-{
-  var updated = await service.UpdateBook(id, request);
-  if (!updated) return Results.NotFound();
-
-  return Results.NoContent();
-  // already updated, no response needed
-});
-
-app.MapGet("/books/{id:int}", async (int id, BookService service) =>
-{
-  var book = await service.GetBookById(id);
-  if (book is null) return Results.NotFound();
-
-  return Results.Ok(book);
-});
+app.MapBookEndpoints();
+// BookEndpoints => Where all the mappings are located for the api
 
 app.Run();
 
