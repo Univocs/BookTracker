@@ -1,5 +1,6 @@
 using BookTracker.Api.Application;
 using BookTracker.Api.Application.CreateBook;
+using BookTracker.Api.Application.GetBookById;
 using BookTracker.Api.Application.UpdateBook;
 using BookTracker.Api.Storage;
 using Microsoft.EntityFrameworkCore;
@@ -51,10 +52,18 @@ app.MapDelete("/books/{id:int}", async (int id, BookService service) =>
 app.MapPut("/books/{id:int}", async (int id, UpdateBookRequest request, BookService service) =>
 {
   var updated = await service.UpdateBook(id, request);
-  if(!updated) return Results.NotFound();
+  if (!updated) return Results.NotFound();
 
   return Results.NoContent();
   // already updated, no response needed
+});
+
+app.MapGet("/books/{id:int}", async (int id, BookService service) =>
+{
+  var book = await service.GetBookById(id);
+  if (book is null) return Results.NotFound();
+
+  return Results.Ok(book);
 });
 
 app.Run();

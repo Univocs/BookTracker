@@ -5,6 +5,16 @@ GET http://localhost:5015/books
 
 ###
 
+### Get Book by Id
+GET http://localhost:5015/books/7
+
+###
+
+### Get Book by non-existing Id
+GET http://localhost:5015/books/70
+
+###
+
 ### Create Book
 POST http://localhost:5015/books
 Content-Type: application/json
