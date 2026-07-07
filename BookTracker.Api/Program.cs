@@ -38,6 +38,15 @@ app.MapPost("/books", async (CreateBookRequest request, BookService service) =>
   return Results.Created($"/books/{response.Id}", response);
 });
 
+app.MapDelete("/books/{id:int}", async (int id, BookService service) =>
+{
+  var deleted = await service.DeleteBook(id);
+  if (!deleted) return Results.NotFound();
+  // If book doesn't exist => API can not delete anything, so NotFound()
+  return Results.NoContent();
+  // Why NoContent()? Because we don't need a response, we already did service.DeleteBook(id);
+});
+
 app.Run();
 
 // Important for integrationtests met WebApplicationFactory

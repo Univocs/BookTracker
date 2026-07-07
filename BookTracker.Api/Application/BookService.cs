@@ -37,4 +37,9 @@ public class BookService(IBookRepository bookRepository)
       Year = savedBook.Year
     };
   }
+
+  public async Task<bool> DeleteBook(int id)
+  {
+    return await bookRepository.DeleteAsync(id);
+  }
 }
