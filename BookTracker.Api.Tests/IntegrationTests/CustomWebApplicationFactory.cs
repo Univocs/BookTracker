@@ -10,6 +10,8 @@ namespace BookTracker.Api.Tests.IntegrationTests;
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
     private SqliteConnection connection = null!;
+    public EfReader GetReader() => new(Services);
+    public EfWriter GetWriter() => new(Services);
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
