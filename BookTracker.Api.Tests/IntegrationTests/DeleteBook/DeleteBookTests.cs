@@ -5,15 +5,16 @@ using BookTracker.Api.Domain;
 
 namespace BookTracker.Api.Tests.IntegrationTests.DeleteBook;
 
-public class DeleteBookTests
+public class DeleteBookTests : IntegrationTest
 {
-  private readonly CustomWebApplicationFactory factory = new();
+  // private readonly CustomWebApplicationFactory factory = new();
+  // |---> DONE BY IntegrationTest
 
   [Fact]
   public async Task Delete_Book_Deletes_Book()
   {
-    var writer = factory.GetWriter();
-    writer.Seed(db => db.Books.Add(
+    // var writer = factory.GetWriter(); ---> DONE BY IntegrationTest
+    Writer.Seed(db => db.Books.Add(
       new Book
       {
         Title = "Dune",
@@ -22,20 +23,20 @@ public class DeleteBookTests
       }
     ));
 
-    var client = factory.CreateClient();
-    var deleted = await client.DeleteAsync("/books/1");
+    // var client = factory.CreateClient(); ---> DONE BY IntegrationTest
+    var deleted = await Client.DeleteAsync("/books/1");
     Assert.Equal(HttpStatusCode.NoContent, deleted.StatusCode);
 
-    var reader = factory.GetReader();
-    var book = reader.Query(db => db.Books.Find(1));
+    // var reader = factory.GetReader(); ---> DONE BY IntegrationTest
+    var book = Reader.Query(db => db.Books.Find(1));
     Assert.Null(book);
   }
 
   [Fact]
   public async Task Delete_Book_NotFound_When_DoesNotExist()
   {
-    var client = factory.CreateClient();
-    var response = await client.DeleteAsync("/books/9999");
+    // var client = factory.CreateClient(); ---> DONE BY IntegrationTest
+    var response = await Client.DeleteAsync("/books/9999");
 
     Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
   }

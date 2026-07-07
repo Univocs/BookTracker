@@ -6,9 +6,10 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace BookTracker.Api.Tests.IntegrationTests.CreateBook;
 
-public class CreateBookTests
+public class CreateBookTests : IntegrationTest
 {
-  private readonly CustomWebApplicationFactory factory = new();
+  // private readonly CustomWebApplicationFactory factory = new();
+  // |---> DONE BY IntegrationTest
 
   [Fact]
   public async Task Post_Book_Creates_Book()
@@ -20,13 +21,13 @@ public class CreateBookTests
       Year = 1940
     };
 
-    var client = factory.CreateClient();
-    var response = await client.PostAsJsonAsync("/books", request);
+    // var client = factory.CreateClient(); ---> DONE BY IntegrationTest
+    var response = await Client.PostAsJsonAsync("/books", request);
     var created = await response.Content.ReadFromJsonAsync<CreateBookResponse>();
     Assert.NotNull(created);
     
-    var reader = factory.GetReader();
-    var book = reader.Query(context => context.Find<Book>(created.Id));
+    // var reader = factory.GetReader(); ---> DONE BY IntegrationTest
+    var book = Reader.Query(context => context.Find<Book>(created.Id));
 
     
     Assert.NotNull(book);
