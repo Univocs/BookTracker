@@ -32,7 +32,7 @@ public class DeleteBookTests
   }
 
   [Fact]
-  public async Task Delete_Book_Not_Found_DoesNotExist()
+  public async Task Delete_Book_NotFound_When_DoesNotExist()
   {
     var client = factory.CreateClient();
     var response = await client.DeleteAsync("/books/9999");

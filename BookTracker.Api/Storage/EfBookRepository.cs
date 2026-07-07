@@ -22,6 +22,19 @@ public class EfBookRepository(AppDbContext dbContext) : IBookRepository
     return book;
   }
 
+  public async Task<bool> UpdateAsync(Book book)
+  {
+    var existingBook = await dbContext.Books.FindAsync(book.Id);
+    if (existingBook is null) return false;
+
+    existingBook.Title = book.Title;
+    existingBook.Author = book.Author;
+    existingBook.Year = book.Year;
+
+    await dbContext.SaveChangesAsync();
+    return true;
+  }
+
   public async Task<bool> DeleteAsync(int id)
   {
     var book = await dbContext.Books.FindAsync(id);

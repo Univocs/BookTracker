@@ -1,5 +1,6 @@
 using BookTracker.Api.Application;
 using BookTracker.Api.Application.CreateBook;
+using BookTracker.Api.Application.UpdateBook;
 using BookTracker.Api.Storage;
 using Microsoft.EntityFrameworkCore;
 
@@ -45,6 +46,15 @@ app.MapDelete("/books/{id:int}", async (int id, BookService service) =>
   // If book doesn't exist => API can not delete anything, so NotFound()
   return Results.NoContent();
   // Why NoContent()? Because we don't need a response, we already did service.DeleteBook(id);
+});
+
+app.MapPut("/books/{id:int}", async (int id, UpdateBookRequest request, BookService service) =>
+{
+  var updated = await service.UpdateBook(id, request);
+  if(!updated) return Results.NotFound();
+
+  return Results.NoContent();
+  // already updated, no response needed
 });
 
 app.Run();

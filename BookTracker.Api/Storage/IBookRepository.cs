@@ -10,6 +10,7 @@ public interface IBookRepository
   // Returns task -- book by Id -- return null possible.
   Task <Book> AddAsync(Book book);
   // Adds a book -- returned with updated Id.
+  Task <bool> UpdateAsync(Book book);
   Task <bool> DeleteAsync(int id);
   // Returns true || false -- deleted or not.
 }

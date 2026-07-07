@@ -10,9 +10,9 @@ POST http://localhost:5015/books
 Content-Type: application/json
 
 {
-  "title": "Dune",
-  "author": "Frank Herbert",
-  "year": 1965
+  "title": "Changes",
+  "author": "David Bowie",
+  "year": 1971
 }
 
 ###
@@ -27,8 +27,28 @@ Content-Type: application/json
   "year": 1934
 }
 
+### Update Book
+PUT http://localhost:5015/books/6
+Content-Type: application/json
+
+{
+  "title": "Changes",
+  "author": "David Bowie",
+  "year": 1971
+}
+
+### Update non-existing Book
+PUT http://localhost:5015/books/9999
+Content-Type: application/json
+
+{
+  "title": "Unknown Book",
+  "author": "Unknown Author",
+  "year": 2000
+}
+
 ### Delete Book
-DELETE  http://localhost:5015/books/10
+DELETE  http://localhost:5015/books/6
 
 ###
 
