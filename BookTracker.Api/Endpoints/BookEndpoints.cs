@@ -1,5 +1,7 @@
 using BookTracker.Api.Application;
+using BookTracker.Api.Application.BookList;
 using BookTracker.Api.Application.CreateBook;
+using BookTracker.Api.Application.GetBookById;
 using BookTracker.Api.Application.UpdateBook;
 using BookTracker.Api.Domain;
 
@@ -17,17 +19,17 @@ public static class BookEndpoints
     return app;
   }
 
-  public static async Task<IResult> GetAllBooks(BookService service)
+  public static async Task<IResult> GetAllBooks(GetBookListQuery query)
   {
-    var books = await service.GetAllBooks();
+    var books = await query.Execute();
     // Use bookservice to await GetAllBooks()
 
     return Results.Ok(books);
   }
 
-  public static async Task<IResult> GetBookById(int id, BookService service)
+  public static async Task<IResult> GetBookById(int id, GetBookByIdQuery query)
   {
-    var book = await service.GetBookById(id);
+    var book = await query.Execute(id);
     if (book is null) return Results.NotFound();
 
     return Results.Ok(book);
@@ -55,7 +57,7 @@ public static class BookEndpoints
       if (!updated) return Results.NotFound();
       return Results.NoContent(); // already updated, no response needed
     }
-    
+
     catch (DomainException exception)
     {
       return Results.BadRequest(new { error = exception.Message });
