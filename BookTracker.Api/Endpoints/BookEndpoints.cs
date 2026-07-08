@@ -1,6 +1,7 @@
 using BookTracker.Api.Application;
 using BookTracker.Api.Application.BookList;
 using BookTracker.Api.Application.CreateBook;
+using BookTracker.Api.Application.DeleteBook;
 using BookTracker.Api.Application.GetBookById;
 using BookTracker.Api.Application.UpdateBook;
 using BookTracker.Api.Domain;
@@ -35,11 +36,11 @@ public static class BookEndpoints
     return Results.Ok(book);
   }
 
-  public static async Task<IResult> CreateBook(CreateBookRequest request, BookService service)
+  public static async Task<IResult> CreateBook(CreateBookRequest request, CreateBookCommandHandler  handler)
   {
     try
     {
-      var response = await service.CreateBook(request);
+      var response = await handler.Execute(request);
       return Results.Created($"/books/{response.Id}", response);
     }
 
@@ -49,11 +50,11 @@ public static class BookEndpoints
     }
   }
 
-  public static async Task<IResult> UpdateBook(int id, UpdateBookRequest request, BookService service)
+  public static async Task<IResult> UpdateBook(int id, UpdateBookRequest request, UpdateBookCommandHandler handler)
   {
     try
     {
-      var updated = await service.UpdateBook(id, request);
+      var updated = await handler.Execute(id, request);
       if (!updated) return Results.NotFound();
       return Results.NoContent(); // already updated, no response needed
     }
@@ -64,9 +65,9 @@ public static class BookEndpoints
     }
   }
 
-  public static async Task<IResult> DeleteBook(int id, BookService service)
+  public static async Task<IResult> DeleteBook(int id, DeleteBookCommandHandler handler)
   {
-    var deleted = await service.DeleteBook(id);
+    var deleted = await handler.Execute(id);
     if (!deleted) return Results.NotFound();
     // If book doesn't exist => API can not delete anything, so NotFound()
 
