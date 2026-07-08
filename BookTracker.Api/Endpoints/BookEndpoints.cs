@@ -19,9 +19,12 @@ public static class BookEndpoints
     return app;
   }
 
-  public static async Task<IResult> GetAllBooks(GetBookListQuery query)
+  public static async Task<IResult> GetAllBooks([AsParameters] GetBookListRequest request, GetBookListQuery query)
+  // [AsParameters] tells ASP.NET to fill one object with all of them automatically.
+  // It's like a label stuck on one box saying "fill me from the URL" (the request)
+  // ASP.Net auto makes this object -> new GetBookListRequest { Page = 2, PageSize = 5 }
   {
-    var books = await query.Execute();
+    var books = await query.Execute(request);
     // Use bookservice to await GetAllBooks()
 
     return Results.Ok(books);
@@ -35,7 +38,7 @@ public static class BookEndpoints
     return Results.Ok(book);
   }
 
-  public static async Task<IResult> CreateBook(CreateBookRequest request, CreateBookCommandHandler  handler)
+  public static async Task<IResult> CreateBook(CreateBookRequest request, CreateBookCommandHandler handler)
   {
     try
     {
