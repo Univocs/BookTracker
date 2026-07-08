@@ -1,4 +1,3 @@
-using BookTracker.Api.Application;
 using BookTracker.Api.Application.BookList;
 using BookTracker.Api.Application.CreateBook;
 using BookTracker.Api.Application.DeleteBook;
