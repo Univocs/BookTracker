@@ -18,8 +18,8 @@ public class BookListTests : IntegrationTest
     Writer.Seed(db => db.Books.Add(
       new Book
       {
-        Title = "Cannery Row",
-        Author = "John Steinbeck",
+        Title = new BookTitle("Cannery Row"),
+        Author = new AuthorName("John Steinbeck"),
         Year = 1945
       }
     ));

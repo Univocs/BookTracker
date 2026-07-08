@@ -25,14 +25,30 @@ public class CreateBookTests : IntegrationTest
     var response = await Client.PostAsJsonAsync("/books", request);
     var created = await response.Content.ReadFromJsonAsync<CreateBookResponse>();
     Assert.NotNull(created);
-    
+
     // var reader = factory.GetReader(); ---> DONE BY IntegrationTest
     var book = Reader.Query(context => context.Find<Book>(created.Id));
 
-    
+
     Assert.NotNull(book);
-    Assert.Equal("The Heart Is a Lonely Hunter", book.Title);
-    Assert.Equal("Carson McCullers", book.Author);
+    Assert.Equal("The Heart Is a Lonely Hunter", book.Title.Value);
+    Assert.Equal("Carson McCullers", book.Author.Value);
     Assert.Equal(1940, book.Year);
+  }
+
+  [Fact]
+  public async Task PostBookReturnsBadRequestWhenTitleIsWhitespace()
+  {
+    var request =
+        new CreateBookRequest
+        {
+          Title = "   ",
+          Author = "      ",
+          Year = 1940
+        };
+
+    var response = await Client.PostAsJsonAsync("/books", request);
+
+    Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
   }
 }

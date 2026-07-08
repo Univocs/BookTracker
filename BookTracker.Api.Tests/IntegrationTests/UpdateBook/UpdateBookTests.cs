@@ -17,8 +17,8 @@ public class UpdateBookTests : IntegrationTest
     Writer.Seed(db => db.Books.Add(
       new Book
       {
-        Title = "Dune",
-        Author = "Frank Herbert",
+        Title = new BookTitle("Dune"),
+        Author = new AuthorName("Frank Herbert"),
         Year = 1965
       }
     ));
@@ -38,8 +38,8 @@ public class UpdateBookTests : IntegrationTest
     // var reader = factory.GetReader(); ---> DONE BY IntegrationTest
     var book = Reader.Query(db => db.Books.Find(1));
     Assert.NotNull(book);
-    Assert.Equal("Dune Messiah", book.Title);
-    Assert.Equal("Frank Herbert", book.Author);
+    Assert.Equal("Dune Messiah", book.Title.Value);
+    Assert.Equal("Frank Herbert", book.Author.Value);
     Assert.Equal(1969, book.Year);
   }
 
