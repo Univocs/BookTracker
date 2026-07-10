@@ -1,6 +1,4 @@
 using System.Net;
-using System.Net.Http.Json;
-using BookTracker.Api.Application.CreateBook;
 using BookTracker.Api.Domain;
 
 namespace BookTracker.Api.Tests.IntegrationTests.DeleteBook;
@@ -25,6 +23,8 @@ public class DeleteBookTests : IntegrationTest
 
     // var client = factory.CreateClient(); ---> DONE BY IntegrationTest
     var deleted = await Client.DeleteAsync("/books/1");
+    await deleted.ShouldHaveStatusCode(HttpStatusCode.NoContent);
+
     Assert.Equal(HttpStatusCode.NoContent, deleted.StatusCode);
 
     // var reader = factory.GetReader(); ---> DONE BY IntegrationTest
@@ -37,6 +37,7 @@ public class DeleteBookTests : IntegrationTest
   {
     // var client = factory.CreateClient(); ---> DONE BY IntegrationTest
     var response = await Client.DeleteAsync("/books/9999");
+    await response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
 
     Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
   }

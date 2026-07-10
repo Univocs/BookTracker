@@ -2,7 +2,6 @@ using System.Net;
 using System.Net.Http.Json;
 using BookTracker.Api.Application.CreateBook;
 using BookTracker.Api.Domain;
-using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace BookTracker.Api.Tests.IntegrationTests.CreateBook;
 
@@ -23,7 +22,9 @@ public class CreateBookTests : IntegrationTest
 
     // var client = factory.CreateClient(); ---> DONE BY IntegrationTest
     var response = await Client.PostAsJsonAsync("/books", request);
-    var created = await response.Content.ReadFromJsonAsync<CreateBookResponse>();
+    var created = await response.ReadJsonAs<CreateBookResponse>(HttpStatusCode.Created);
+    // status "Created" is checked before Json is being read into var "created"
+
     Assert.NotNull(created);
 
     // var reader = factory.GetReader(); ---> DONE BY IntegrationTest
@@ -48,7 +49,8 @@ public class CreateBookTests : IntegrationTest
         };
 
     var response = await Client.PostAsJsonAsync("/books", request);
-
+    await response.ShouldHaveStatusCode(HttpStatusCode.BadRequest);
+    
     Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
   }
 }

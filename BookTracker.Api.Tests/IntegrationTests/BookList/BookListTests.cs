@@ -28,8 +28,8 @@ public class BookListTests : IntegrationTest
     var response = await Client.GetAsync("/books");
     // GET request to /books -> HTTP response back
 
-    var result = await response.Content.ReadFromJsonAsync<PagedResult<BookInfo>>();
-    // JSON response body into a PagedResult<BookInfo>
+    var result = await response.ReadJsonAs<PagedResult<BookInfo>>(HttpStatusCode.OK);
+    // JSON response body into a PagedResult<BookInfo> only if HttpStatusCode is OK.
 
     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     Assert.NotNull(result);

@@ -32,7 +32,8 @@ public class UpdateBookTests : IntegrationTest
 
     // var client = factory.CreateClient(); ---> DONE BY IntegrationTest
     var response = await Client.PutAsJsonAsync("/books/1", request);
-
+    await response.ShouldHaveStatusCode(HttpStatusCode.NoContent);
+    
     Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
 
     // var reader = factory.GetReader(); ---> DONE BY IntegrationTest
@@ -57,6 +58,7 @@ public class UpdateBookTests : IntegrationTest
     // var client = factory.CreateClient(); ---> DONE BY IntegrationTest
 
     var response = await Client.PutAsJsonAsync("/books/9999", request);
+    await response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
 
     Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
   }
