@@ -22,6 +22,13 @@ public record AuthorName
     Value = cleaned;
   }
 
+  // implicit operator => whenever string expected, automatically convert from object to string 
+  public static implicit operator string(AuthorName author)
+  {
+    return author.Value; // Use Case => var title = new BookTitle("Dune");  =>  string text = title;
+  }                      // Domain Rules still exist even in string form with possible exceptions.
+  
+
   // override ToString() gives the actual text or value of the title instead of the class name.
   public override string ToString()
   {

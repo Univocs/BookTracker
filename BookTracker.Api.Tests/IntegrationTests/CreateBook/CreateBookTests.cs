@@ -22,6 +22,8 @@ public class CreateBookTests : IntegrationTest
 
     // var client = factory.CreateClient(); ---> DONE BY IntegrationTest
     var response = await Client.PostAsJsonAsync("/books", request);
+
+    // Uses HttpResponseAssertions
     var created = await response.ReadJsonAs<CreateBookResponse>(HttpStatusCode.Created);
     // status "Created" is checked before Json is being read into var "created"
 
@@ -49,8 +51,9 @@ public class CreateBookTests : IntegrationTest
         };
 
     var response = await Client.PostAsJsonAsync("/books", request);
+    // Uses HttpResponseAssertions
     await response.ShouldHaveStatusCode(HttpStatusCode.BadRequest);
-    
+
     Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
   }
 }

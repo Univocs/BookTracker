@@ -29,10 +29,25 @@ public class GetBookListQuery(AppDbContext dbContext)
     var pageSize = Math.Clamp(request.PageSize ?? DefaultPageSize, MinPageSize, MaxPageSize);
     // Pagesize (if null == DefaultPageSize) is clamped in between MinPageSize && MaxPageSize
 
-    var totalItems = await dbContext.Books.CountAsync();
+    var booksQuery = dbContext.Books.AsNoTracking(); // you build 1 db query object as variable for both count & fetch.
+
+    // Only filter if a search term was actually given (skips null, "", and "   ")
+    if (!string.IsNullOrWhiteSpace(request.Search))
+    {
+      var searched = $"%{request.Search.Trim()}%"; // From /books?search=" dune " to /books?search="dune"
+
+      booksQuery = booksQuery.Where(book =>                    // for instance: WHERE Title LIKE '%dune%'
+          EF.Functions.Like((string)book.Title, searched) ||
+          EF.Functions.Like((string)book.Author, searched));
+      // (string) => implicit operator we added to BookTitle —> value object to a string 
+      // EF.Functions.Like can use it now -> translates to SQL's LIKE operator
+    }
+
+    // CountAsync after the query search => to get all books that have the search filter name.
+    var totalItems = await booksQuery.CountAsync();
     // how many rows are in the Books table in total? --> 42 books in db means totalItems = 42
 
-    var books = await dbContext.Books  // Start with the Books table
+    var books = await booksQuery  // Start with the Books table
         .AsNoTracking() // "Only reading — don't track these for changes." (Normally entities saved for later edits).
         .OrderBy(book => book.Id) // Sort all 25 books by Id, happens before Skip/Take because order is needed.
         .Skip((page - 1) * pageSize) // (page 1-1)*10 = 0 → skips nothing, starts from book 1 // (2-1)*10 = 10 → skip first 10, start from 11

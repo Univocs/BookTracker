@@ -23,6 +23,7 @@ public class DeleteBookTests : IntegrationTest
 
     // var client = factory.CreateClient(); ---> DONE BY IntegrationTest
     var deleted = await Client.DeleteAsync("/books/1");
+    // Uses HttpResponseAssertions
     await deleted.ShouldHaveStatusCode(HttpStatusCode.NoContent);
 
     Assert.Equal(HttpStatusCode.NoContent, deleted.StatusCode);
@@ -37,6 +38,7 @@ public class DeleteBookTests : IntegrationTest
   {
     // var client = factory.CreateClient(); ---> DONE BY IntegrationTest
     var response = await Client.DeleteAsync("/books/9999");
+    // Uses HttpResponseAssertions
     await response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
 
     Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);

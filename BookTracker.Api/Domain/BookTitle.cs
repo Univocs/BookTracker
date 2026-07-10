@@ -22,6 +22,12 @@ public record BookTitle
     Value = cleaned;
   }
 
+  // implicit operator => whenever string expected, automatically convert from object to string 
+  public static implicit operator string(BookTitle title)
+  {
+    return title.Value; // returns string value
+  }
+
   // override ToString() gives the actual text or value of the title instead of the class name.
   public override string ToString()
   {

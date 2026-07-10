@@ -25,6 +25,8 @@ public class GetBookByIdTests : IntegrationTest
     // var client = factory.CreateClient(); ---> DONE BY IntegrationTest
 
     var response = await Client.GetAsync("/books/1");
+
+    // Uses HttpResponseAssertions
     var book = await response.ReadJsonAs<BookDetails>(HttpStatusCode.OK);
     // JSON response body into <BookDetails> only if HttpStatusCode is OK.
 
@@ -41,8 +43,9 @@ public class GetBookByIdTests : IntegrationTest
   {
     // var client = factory.CreateClient(); ---> DONE BY IntegrationTest
     var response = await Client.GetAsync("/books/22220");
+    // Uses HttpResponseAssertions
     await response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
-    
+
     Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
   }
 }

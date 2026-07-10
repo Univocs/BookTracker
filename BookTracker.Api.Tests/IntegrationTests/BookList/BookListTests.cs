@@ -28,6 +28,7 @@ public class BookListTests : IntegrationTest
     var response = await Client.GetAsync("/books");
     // GET request to /books -> HTTP response back
 
+    // Uses HttpResponseAssertions
     var result = await response.ReadJsonAs<PagedResult<BookInfo>>(HttpStatusCode.OK);
     // JSON response body into a PagedResult<BookInfo> only if HttpStatusCode is OK.
 
@@ -105,5 +106,130 @@ public class BookListTests : IntegrationTest
     Assert.Equal(10, result.PageSize);   // and "here's the pageSize you used"
     Assert.Equal(1, result.TotalItems);  // there's still 1 book in total, in the whole database
     Assert.Equal(1, result.TotalPages);  // and with 1 book / pageSize 10, only 1 page actually exists
+  }
+
+  [Fact]
+  public async Task Get_Books_Can_Search_ByTitle()
+  {
+    Writer.Seed(db =>
+    {
+      db.Books.AddRange(
+          new Book
+          {
+            Title = new BookTitle("Dune"),
+            Author = new AuthorName("Frank Herbert"),
+            Year = 1965
+          },
+          new Book
+          {
+            Title = new BookTitle("The Big Sleep"),
+            Author = new AuthorName("Raymond Chandler"),
+            Year = 1939
+          });
+    });
+
+    var response = await Client.GetAsync("/books?search=dune");
+
+    var result = await response.ReadJsonAs<PagedResult<BookInfo>>(HttpStatusCode.OK);
+
+    var book = Assert.Single(result.Items);
+
+    Assert.Equal("Dune", book.Title);
+    Assert.Equal("Frank Herbert", book.Author);
+    Assert.Equal(1, result.TotalItems);
+    Assert.Equal(1, result.TotalPages);
+  }
+
+  [Fact]
+  public async Task Get_Books_Can_Search_ByAuthor()
+  {
+    Writer.Seed(db =>
+    {
+      db.Books.AddRange(
+          new Book
+          {
+            Title = new BookTitle("Dune"),
+            Author = new AuthorName("Frank Herbert"),
+            Year = 1965
+          },
+          new Book
+          {
+            Title = new BookTitle("The Big Sleep"),
+            Author = new AuthorName("Raymond Chandler"),
+            Year = 1939
+          });
+    });
+
+    var response = await Client.GetAsync("/books?search=Frank");
+
+    var result = await response.ReadJsonAs<PagedResult<BookInfo>>(HttpStatusCode.OK);
+
+    var book = Assert.Single(result.Items);
+
+    Assert.Equal("Dune", book.Title);
+    Assert.Equal("Frank Herbert", book.Author);
+    Assert.Equal(1, result.TotalItems);
+    Assert.Equal(1, result.TotalPages);
+  }
+
+
+  [Fact]
+  public async Task Get_Books_Applies_Paging_AfterSearch()
+  {
+    Writer.Seed(db =>
+    {
+      db.Books.AddRange(
+          new Book
+          {
+            Title = new BookTitle("Dune"),
+            Author = new AuthorName("Frank Herbert"),
+            Year = 1965
+          },
+          new Book
+          {
+            Title = new BookTitle("Dune Messiah"),
+            Author = new AuthorName("Frank Herbert"),
+            Year = 1969
+          },
+          new Book
+          {
+            Title = new BookTitle("The Big Sleep"),
+            Author = new AuthorName("Raymond Chandler"),
+            Year = 1939
+          });
+    });
+
+    var response = await Client.GetAsync("/books?search=dune&page=2&pageSize=1");
+
+    var result = await response.ReadJsonAs<PagedResult<BookInfo>>(HttpStatusCode.OK);
+
+    var book = Assert.Single(result.Items);
+
+    Assert.Equal("Dune Messiah", book.Title);
+    Assert.Equal(2, result.Page);
+    Assert.Equal(1, result.PageSize);
+    Assert.Equal(2, result.TotalItems);
+    Assert.Equal(2, result.TotalPages);
+  }
+
+  [Fact]
+  public async Task Get_Books_Returns_Empty_List_When_Search_NoResults()
+  {
+    Writer.Seed(db =>
+    {
+      db.Books.AddRange(
+          new Book
+          {
+            Title = new BookTitle("Dune"),
+            Author = new AuthorName("Frank Herbert"),
+            Year = 1965
+          });
+    });
+
+    var response = await Client.GetAsync("/books?search=Raymond");
+    var result = await response.ReadJsonAs<PagedResult<BookInfo>>(HttpStatusCode.OK);
+
+    Assert.NotNull(result);
+    Assert.Empty(result.Items);
   }
 }
