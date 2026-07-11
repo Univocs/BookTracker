@@ -9,7 +9,7 @@ namespace BookTracker.Api.Application.GetBookSummaries;
 ------------Projecting to BookInfo------------
 ------------Retrieving the result-------------
 */
-public class GetBookSummariesQueryHandler(AppDbContext dbContext)
+public class GetBookSummariesQueryHandler(AppDbContext dbContext) : IHandler
 {
   private const int DefaultPages = 1;
   private const int DefaultPageSize = 10;
