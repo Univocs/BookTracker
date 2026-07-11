@@ -1,11 +1,11 @@
 using BookTracker.Api.Storage;
 using Microsoft.EntityFrameworkCore;
 
-namespace BookTracker.Api.Application.GetBookById;
+namespace BookTracker.Api.Application.GetBookDetails;
 
-public class GetBookByIdQuery(AppDbContext dbContext)
+public class GetBookDetailsQueryHandler(AppDbContext dbContext)
 {
-  public async Task<BookDetails?> Execute(int id)
+  public async Task<GetBookDetailsResponse?> Execute(int id)
   // A query only has one task = to Execute()
 
   {
@@ -13,7 +13,7 @@ public class GetBookByIdQuery(AppDbContext dbContext)
     .AsNoTracking() // "Only reading — don't track these for changes." (Normally entities saved for later edits).
     .Where(book => book.Id == id) // execute when the book id in books == int id
     .Select(book => // For every book row, build BookDetails directly with Id, Title, Author and Year.
-        new BookDetails
+        new GetBookDetailsResponse
         {
           Id = book.Id,
           Title = book.Title.Value,

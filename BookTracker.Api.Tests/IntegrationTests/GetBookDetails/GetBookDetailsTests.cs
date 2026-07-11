@@ -1,8 +1,8 @@
 using System.Net;
-using BookTracker.Api.Application.GetBookById;
+using BookTracker.Api.Application.GetBookDetails;
 using BookTracker.Api.Domain;
 
-namespace BookTracker.Api.Tests.IntegrationTests.GetBookById;
+namespace BookTracker.Api.Tests.IntegrationTests.GetBookDetails;
 
 public class GetBookByIdTests : IntegrationTest
 {
@@ -10,7 +10,7 @@ public class GetBookByIdTests : IntegrationTest
   // ---> DONE BY IntegrationTest
 
   [Fact]
-  public async Task GetBookById_Returns_Book()
+  public async Task Get_Book_Details_Returns_Book_Details()
   {
     // var writer = factory.GetWriter(); ---> DONE BY IntegrationTest
     Writer.Seed(db => db.Books.Add(
@@ -27,10 +27,9 @@ public class GetBookByIdTests : IntegrationTest
     var response = await Client.GetAsync("/books/1");
 
     // Uses HttpResponseAssertions
-    var book = await response.ReadJsonAs<BookDetails>(HttpStatusCode.OK);
+    var book = await response.ReadJsonAs<GetBookDetailsResponse>(HttpStatusCode.OK);
     // JSON response body into <BookDetails> only if HttpStatusCode is OK.
 
-    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     Assert.NotNull(book);
     Assert.Equal(1, book.Id);
     Assert.Equal("Dune", book.Title);
@@ -39,13 +38,11 @@ public class GetBookByIdTests : IntegrationTest
   }
 
   [Fact]
-  public async Task GetBookById_Returns_NotFound_When_Book_Does_NotExist()
+  public async Task Get_Book_Details_Returns_NotFound_When_Book_Does_NotExist()
   {
     // var client = factory.CreateClient(); ---> DONE BY IntegrationTest
     var response = await Client.GetAsync("/books/22220");
     // Uses HttpResponseAssertions
     await response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
-
-    Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
   }
 }

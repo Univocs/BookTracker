@@ -1,10 +1,10 @@
 using System.Net;
 using System.Net.Http.Json;
 using BookTracker.Api.Application;
-using BookTracker.Api.Application.Booklist;
+using BookTracker.Api.Application.GetBookSummaries;
 using BookTracker.Api.Domain;
 
-namespace BookTracker.Api.Tests.IntegrationTests.BookList;
+namespace BookTracker.Api.Tests.IntegrationTests.GetBookSummaries;
 
 public class BookListTests : IntegrationTest
 {
@@ -12,7 +12,7 @@ public class BookListTests : IntegrationTest
   // |---> DONE BY IntegrationTest
 
   [Fact]
-  public async Task Get_Books_Returns_Books()
+  public async Task Get_Book_Summaries_Returns_Book_Summaries()
   {
     // var writer = factory.GetWriter(); ---> DONE BY IntegrationTest
     Writer.Seed(db => db.Books.Add(
@@ -29,7 +29,7 @@ public class BookListTests : IntegrationTest
     // GET request to /books -> HTTP response back
 
     // Uses HttpResponseAssertions
-    var result = await response.ReadJsonAs<PagedResult<BookInfo>>(HttpStatusCode.OK);
+    var result = await response.ReadJsonAs<PagedResult<BookSummary>>(HttpStatusCode.OK);
     // JSON response body into a PagedResult<BookInfo> only if HttpStatusCode is OK.
 
     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -46,7 +46,7 @@ public class BookListTests : IntegrationTest
   }
 
   [Fact]
-  public async Task Get_Books_Returns_RequestedPage()
+  public async Task Get_Book_Summaries_Returns_RequestedPage()
   {
     Writer.Seed(db =>
     {
@@ -71,7 +71,7 @@ public class BookListTests : IntegrationTest
           });
     });
 
-    var result = await Client.GetFromJsonAsync<PagedResult<BookInfo>>("/books?page=2&pageSize=1");
+    var result = await Client.GetFromJsonAsync<PagedResult<BookSummary>>("/books?page=2&pageSize=1");
 
     Assert.NotNull(result);
 
@@ -85,7 +85,7 @@ public class BookListTests : IntegrationTest
   }
 
   [Fact]
-  public async Task Get_Books_Returns_EmptyItems_When_Page_TooHigh()
+  public async Task Get_Books_Summaries_Returns_EmptyItems_When_Page_TooHigh()
   {
     Writer.Seed(db =>
     {
@@ -98,7 +98,7 @@ public class BookListTests : IntegrationTest
           });
     });
 
-    var result = await Client.GetFromJsonAsync<PagedResult<BookInfo>>("/books?page=99&pageSize=10");
+    var result = await Client.GetFromJsonAsync<PagedResult<BookSummary>>("/books?page=99&pageSize=10");
 
     Assert.NotNull(result);              // API still responded successfully — no 404, no error
     Assert.Empty(result.Items);          // no books came back — makes sense, page 99 has none
@@ -109,7 +109,7 @@ public class BookListTests : IntegrationTest
   }
 
   [Fact]
-  public async Task Get_Books_Can_Search_ByTitle()
+  public async Task Get_Books_Summaries_Can_Search_ByTitle()
   {
     Writer.Seed(db =>
     {
@@ -130,7 +130,7 @@ public class BookListTests : IntegrationTest
 
     var response = await Client.GetAsync("/books?search=dune");
 
-    var result = await response.ReadJsonAs<PagedResult<BookInfo>>(HttpStatusCode.OK);
+    var result = await response.ReadJsonAs<PagedResult<BookSummary>>(HttpStatusCode.OK);
 
     var book = Assert.Single(result.Items);
 
@@ -141,7 +141,7 @@ public class BookListTests : IntegrationTest
   }
 
   [Fact]
-  public async Task Get_Books_Can_Search_ByAuthor()
+  public async Task Get_Books_Summaries_Can_Search_ByAuthor()
   {
     Writer.Seed(db =>
     {
@@ -162,7 +162,7 @@ public class BookListTests : IntegrationTest
 
     var response = await Client.GetAsync("/books?search=Frank");
 
-    var result = await response.ReadJsonAs<PagedResult<BookInfo>>(HttpStatusCode.OK);
+    var result = await response.ReadJsonAs<PagedResult<BookSummary>>(HttpStatusCode.OK);
 
     var book = Assert.Single(result.Items);
 
@@ -174,7 +174,7 @@ public class BookListTests : IntegrationTest
 
 
   [Fact]
-  public async Task Get_Books_Applies_Paging_AfterSearch()
+  public async Task Get_Books_Summaries_Applies_Paging_AfterSearch()
   {
     Writer.Seed(db =>
     {
@@ -201,7 +201,7 @@ public class BookListTests : IntegrationTest
 
     var response = await Client.GetAsync("/books?search=dune&page=2&pageSize=1");
 
-    var result = await response.ReadJsonAs<PagedResult<BookInfo>>(HttpStatusCode.OK);
+    var result = await response.ReadJsonAs<PagedResult<BookSummary>>(HttpStatusCode.OK);
 
     var book = Assert.Single(result.Items);
 
@@ -213,7 +213,7 @@ public class BookListTests : IntegrationTest
   }
 
   [Fact]
-  public async Task Get_Books_Returns_Empty_List_When_Search_NoResults()
+  public async Task Get_Books_Summaries_Returns_Empty_List_When_Search_NoResults()
   {
     Writer.Seed(db =>
     {
@@ -227,7 +227,7 @@ public class BookListTests : IntegrationTest
     });
 
     var response = await Client.GetAsync("/books?search=Raymond");
-    var result = await response.ReadJsonAs<PagedResult<BookInfo>>(HttpStatusCode.OK);
+    var result = await response.ReadJsonAs<PagedResult<BookSummary>>(HttpStatusCode.OK);
 
     Assert.NotNull(result);
     Assert.Empty(result.Items);
