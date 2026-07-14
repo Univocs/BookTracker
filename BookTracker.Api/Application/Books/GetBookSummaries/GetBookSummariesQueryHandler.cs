@@ -1,0 +1,75 @@
+using BookTracker.Api.Storage;
+using Microsoft.EntityFrameworkCore;
+
+namespace BookTracker.Api.Application.Books.GetBookSummaries;
+
+/*-----------------PAGING---------------------
+------------Filtering and sorting-------------
+------------Applying pagination---------------
+------------Projecting to BookInfo------------
+------------Retrieving the result-------------
+*/
+public class GetBookSummariesQueryHandler(AppDbContext dbContext) : IHandler
+{
+  private const int DefaultPages = 1;
+  private const int DefaultPageSize = 10;
+  private const int MinPageSize = 1;
+  private const int MaxPageSize = 50; // Const for fixed values and private because nothing outside needs them
+
+  // Before: used to return Task<IReadOnlyList<BookInfo>> (a plain list). 
+  // Now it returns Task<PagedResult<BookInfo>> — the wrapper with metadata. 
+  // It also now takes in a parameter, request, which carries whatever page/pageSize the caller asked for.
+  public async Task<GetBookSummariesResponse> Execute(GetBookSummariesRequest request)
+  // A query only has one task = to Execute()
+  {
+    var page = Math.Max(1, request.Page ?? DefaultPages); // 1 is the lowest valid page number.
+    // ?? is the null-coalescing operator. "evaluate the left side If not null, use it. If it IS null, use DefaultPages."
+
+    var pageSize = Math.Clamp(request.PageSize ?? DefaultPageSize, MinPageSize, MaxPageSize);
+    // Pagesize (if null == DefaultPageSize) is clamped in between MinPageSize && MaxPageSize
+
+    var booksQuery = dbContext.Books.AsNoTracking(); // you build 1 db query object as variable for both count & fetch.
+    // "Only reading — don't track these for changes." (Normally entities saved for later edits).
+
+    // Only filter if a search term was actually given (skips null, "", and "   ")
+    if (!string.IsNullOrWhiteSpace(request.Search))
+    {
+      var searched = $"%{request.Search.Trim()}%"; // From /books?search=" dune " to /books?search="dune"
+
+      booksQuery = booksQuery.Where(book =>                    // for instance: WHERE Title LIKE '%dune%'
+          EF.Functions.Like((string)book.Title, searched) ||
+          EF.Functions.Like((string)book.Author, searched));
+      // (string) => implicit operator we added to BookTitle —> value object to a string 
+      // EF.Functions.Like can use it now -> translates to SQL's LIKE operator
+    }
+
+    // CountAsync after the query search => to get all books that have the search filter name.
+    var totalItems = await booksQuery.CountAsync();
+    // how many rows are in the Books table in total? --> 42 books in db means totalItems = 42
+
+    var books = await booksQuery  // Start with the Books table
+        .OrderBy(book => book.Id) // Sort all 25 books by Id, happens before Skip/Take because order is needed.
+        .Skip((page - 1) * pageSize) // (page 1-1)*10 = 0 → skips nothing, starts from book 1 // (2-1)*10 = 10 → skip first 10, start from 11
+        .Take(pageSize) // .Take(10). After what's left (11–25), grab only the next 10. So books 11–20 → page 2!
+        .Select(book => // For every book row, build BookInfo directly with only Id, Title, Author from the database.
+                new BookSummary
+                {
+                  Id = book.Id,
+                  Title = book.Title.Value,
+                  Author = book.Author.Value
+                  // BookInfo as a response DTO doesn't need to make new objects BookTitle && AuthorName.
+                })
+                .ToListAsync();  // Run the query against the database and put the results into a List<BookInfo>.
+                                 // Send this SQL to the database, do the work and get results back in a list<BookInfo>.
+
+    return new GetBookSummariesResponse
+    {
+      Items = books,
+      Page = page,
+      PageSize = pageSize,
+      TotalItems = totalItems,
+      TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize)
+      // 42 / 10.0 (dec) = 4.2 → Math.Ceiling always rounds up to the next whole number.
+    };
+  }
+}

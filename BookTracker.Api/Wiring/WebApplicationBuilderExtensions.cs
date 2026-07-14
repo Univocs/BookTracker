@@ -1,6 +1,8 @@
 using BookTracker.Api.Application;
+using BookTracker.Api.Storage.Books;
 using BookTracker.Api.Storage;
 using Microsoft.EntityFrameworkCore;
+using BookTracker.Api.Storage.Members;
 
 namespace BookTracker.Api.Wiring;
 
@@ -20,6 +22,7 @@ public static class WebApplicationBuilderExtensions
             options.UseSqlite(builder.Configuration.GetConnectionString("BookTracker")));
         // Register AppDbContext with SQLite, using the connection string from config
         builder.Services.AddScoped<IBookRepository, EfBookRepository>();
+        builder.Services.AddScoped<IMemberRepository, EfMemberRepository>();
         // Scoped = fresh AppDbContext + EfBookRepository per request
         // thrown away after -> no cross-contamination between users
     }

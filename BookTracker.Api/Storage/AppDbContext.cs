@@ -1,4 +1,5 @@
-using BookTracker.Api.Domain;
+using BookTracker.Api.Domain.Books;
+using BookTracker.Api.Domain.Members;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookTracker.Api.Storage;
@@ -6,6 +7,7 @@ namespace BookTracker.Api.Storage;
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
   public DbSet<Book> Books => Set<Book>();
+  public DbSet<Member> Members => Set<Member>();
 
   // this is where you configure things EF can't figure out on its own,
   // like how to store your custom value objects (BookTitle, AuthorName).
@@ -26,6 +28,22 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
               value => new AuthorName(value))
           .HasMaxLength(AuthorName.MaxLength);
     });
+//--------------------------------------------------------------
+    modelBuilder.Entity<Member>(member =>
+    {
+      member.Property(m => m.Email)
+            .HasConversion(
+              email => email.Value,
+              value => new MemberEmail(value))
+            .HasMaxLength(MemberEmail.MaxLength);
+      
+      member.Property(m => m.Name)
+            .HasConversion(
+                name => name.Value,
+                value => new MemberName(value))
+            .HasMaxLength(MemberName.MaxLength);
+    });
+
   }
 }
 

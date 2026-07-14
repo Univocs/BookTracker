@@ -1,4 +1,3 @@
-
 using BookTracker.Api.Wiring;
 
 var builder = WebApplication.CreateBuilder(args); // create builder for WebApplication

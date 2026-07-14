@@ -75,3 +75,30 @@ GET http://localhost:5015/books?search=octopus
 GET http://localhost:5015/books?search=octopus&page=1&pageSize=5
 
 ###
+
+### Get Members
+GET http://localhost:5015/members
+
+### Create Member
+POST http://localhost:5015/members
+Content-Type: application/json
+
+{
+  "name": "Ada Lovelace",
+  "email": "ada@example.com"
+}
+
+### Get Member Details
+GET http://localhost:5015/members/1
+
+### Update Member
+PUT http://localhost:5015/members/1
+Content-Type: application/json
+
+{
+  "name": "Ada Byron",
+  "email": "ada.byron@example.com"
+}
+
+### Delete Member
+DELETE http://localhost:5015/members/1
