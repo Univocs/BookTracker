@@ -9,17 +9,17 @@ public record BookTitle
 
   public BookTitle(string value)
   {
-    // Remove leading/trailing whitespace first from value!
-    var cleaned = value.Trim();
+    var cleanedValue = value;
 
-    // Empty string or only whitespace will throw a DomainException! 
-    if (string.IsNullOrWhiteSpace(cleaned)) throw new DomainException("Title is required.");
+     // Empty string or only whitespace will throw a DomainException! 
+    if (string.IsNullOrWhiteSpace(cleanedValue)) throw new DomainException("Title is required.");
+    cleanedValue = value.Trim();
 
     // Length of cleaned cannot exceed MaxLength, otherwise will throw a DomainException! 
-    if (cleaned.Length > MaxLength) throw new DomainException($"Title cannot be longer than {MaxLength} characters.");
+    if (cleanedValue.Length > MaxLength) throw new DomainException($"Title cannot be longer than {MaxLength} characters.");
 
     // If everything ok, string Value will be the BookTitle value called "cleaned"! 
-    Value = cleaned;
+    Value = cleanedValue;
   }
 
   // implicit operator => whenever string expected, automatically convert from object to string 

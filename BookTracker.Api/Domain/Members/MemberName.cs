@@ -9,9 +9,10 @@ public record MemberName
 //------------------------------------------------------------------
   public MemberName(string value)
   {
-    var cleaned = value.Trim();
-
+    var cleaned = value;
     if (string.IsNullOrWhiteSpace(cleaned)) throw new DomainException("Member name is required.");
+    cleaned = value.Trim();
+
     if (cleaned.Length > MaxLength) throw new DomainException($"Member name cannot be longer than {MaxLength} characters.");
 
     Value = cleaned;

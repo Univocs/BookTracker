@@ -9,9 +9,10 @@ public class MemberEmail
   //------------------------------------------------------------------
   public MemberEmail(string value)
   {
-    var cleaned = value.Trim();
-
+    var cleaned = value;
     if (string.IsNullOrWhiteSpace(cleaned)) throw new DomainException("Member email is required.");
+    cleaned = value.Trim();
+    
     if (cleaned.Length > MaxLength) throw new DomainException($"Member email cannot be longer than {MaxLength} characters.");
     if (!cleaned.Contains('@')) throw new DomainException("Member email needs to contain '@'.");
 

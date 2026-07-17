@@ -48,4 +48,5 @@ public class GetMemberSummariesQueryHandler(AppDbContext dbContext) : IHandler
       // 42 / 10.0 (dec) = 4.2 → Math.Ceiling always rounds up to the next whole number -> new page
     };
   }
+  
 }

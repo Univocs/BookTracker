@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using BookTracker.Api.Application;
 using BookTracker.Api.Application.Books.GetBookSummaries;
+using BookTracker.Api.Domain;
 using BookTracker.Api.Domain.Books;
 
 namespace BookTracker.Api.Tests.IntegrationTests.Books.GetBookSummaries;
@@ -230,4 +231,14 @@ public class BookListTests : IntegrationTest
     Assert.NotNull(result);
     Assert.Empty(result.Items);
   }
+
+[Fact]
+    public void BookTitle_And_BookAuthor_RejectsNull()
+    {
+        var titleException = Assert.Throws<DomainException>(() => new BookTitle(null!));
+        var authorException = Assert.Throws<DomainException>(() => new AuthorName(null!));
+
+        Assert.Equal("Title is required.", titleException.Message);
+        Assert.Equal("Author is required.", authorException.Message);
+    }
 }

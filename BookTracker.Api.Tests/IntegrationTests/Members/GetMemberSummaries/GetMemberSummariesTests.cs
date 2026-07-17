@@ -1,6 +1,7 @@
 using System.Net;
 using BookTracker.Api.Application;
 using BookTracker.Api.Application.Members.GetMemberSummaries;
+using BookTracker.Api.Domain;
 using BookTracker.Api.Domain.Members;
 
 namespace BookTracker.Api.Tests.IntegrationTests.Members.GetMemberSummaries;
@@ -129,4 +130,14 @@ public class GetMemberSummariesTests : IntegrationTest
     Assert.NotNull(result);
     Assert.Empty(result.Items);
   }
+
+  [Fact]
+    public void BookTitle_And_BookAuthor_RejectsNull()
+    {
+        var nameException = Assert.Throws<DomainException>(() => new MemberName(null!));
+        var emailException = Assert.Throws<DomainException>(() => new MemberEmail(null!));
+
+        Assert.Equal("Member name is required.", nameException.Message);
+        Assert.Equal("Member email is required.", emailException.Message);
+    }
 }
