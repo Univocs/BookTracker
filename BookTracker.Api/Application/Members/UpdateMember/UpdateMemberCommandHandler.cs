@@ -7,11 +7,14 @@ public class UpdateMemberCommandHandler(IMemberRepository memberRepository) : IH
 {
   public async Task<bool> Execute(int id, UpdateMemberRequest request)
   {
+    var email = new MemberEmail(request.Email);
+    if (await memberRepository.EmailExistsAsync(email, id)) throw new MemberEmailAlreadyExistsException();
+
     var updatedMember = new Member
     {
       Id = id,
       Name = new MemberName(request.Name),
-      Email = new MemberEmail(request.Email)
+      Email = email
     };
 
     return await memberRepository.UpdateAsync(updatedMember);

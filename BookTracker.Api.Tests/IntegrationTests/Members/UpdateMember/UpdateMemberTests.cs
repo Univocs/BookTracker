@@ -14,7 +14,8 @@ public class UpdateMemberTests : IntegrationTest
       new Member
       {
         Name = new MemberName("Liam Neeson"),
-        Email = new MemberEmail("Liam@hotmail.com")
+        Email = new MemberEmail("Liam@hotmail.com"),
+        PasswordHash = "test-password-hash"
       }
     ));
 
@@ -53,7 +54,8 @@ public class UpdateMemberTests : IntegrationTest
       new Member
       {
         Name = new MemberName("Liam Neeson"),
-        Email = new MemberEmail("Liam@hotmail.com")
+        Email = new MemberEmail("Liam@hotmail.com"),
+        PasswordHash = "test-password-hash"
       }
     ));
 

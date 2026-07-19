@@ -15,7 +15,8 @@ public class GetMemberSummariesTests : IntegrationTest
       new Member
       {
         Name = new MemberName("Liam Neeson"),
-        Email = new MemberEmail("Liam@hotmail.com")
+        Email = new MemberEmail("Liam@hotmail.com"),
+        PasswordHash = "test-password-hash"
       }
     ));
 
@@ -25,7 +26,7 @@ public class GetMemberSummariesTests : IntegrationTest
     var membersInfo = Assert.Single(allMembers.Items);
 
     Assert.Equal("Liam Neeson", membersInfo.Name);
-    Assert.Equal("Liam@hotmail.com", membersInfo.Email);
+    Assert.Equal("liam@hotmail.com", membersInfo.Email);
     Assert.Equal(1, allMembers.Page);
     Assert.Equal(10, allMembers.PageSize);
     Assert.Equal(1, allMembers.TotalItems);
@@ -39,7 +40,8 @@ public class GetMemberSummariesTests : IntegrationTest
       new Member
       {
         Name = new MemberName("Liam Neeson"),
-        Email = new MemberEmail("Liam@hotmail.com")
+        Email = new MemberEmail("Liam@hotmail.com"),
+        PasswordHash = "test-password-hash"
       }
     ));
 
@@ -48,7 +50,7 @@ public class GetMemberSummariesTests : IntegrationTest
     var member = Assert.Single(result.Items);
 
     Assert.Equal("Liam Neeson", member.Name);
-    Assert.Equal("Liam@hotmail.com", member.Email);
+    Assert.Equal("liam@hotmail.com", member.Email);
     Assert.Equal(1, result.TotalItems);
     Assert.Equal(1, result.TotalPages);
   }
@@ -60,7 +62,8 @@ public class GetMemberSummariesTests : IntegrationTest
      new Member
      {
        Name = new MemberName("Liam Neeson"),
-       Email = new MemberEmail("someone@hotmail.com")
+       Email = new MemberEmail("someone@hotmail.com"),
+       PasswordHash = "test-password-hash"
      }
    ));
 
@@ -83,17 +86,20 @@ public class GetMemberSummariesTests : IntegrationTest
           new Member
           {
             Name = new MemberName("Liam Neeson"),
-            Email = new MemberEmail("someone@hotmail.com")
+            Email = new MemberEmail("someone@hotmail.com"),
+            PasswordHash = "test-password-hash"
           },
           new Member
           {
             Name = new MemberName("john"),
-            Email = new MemberEmail("someone_Charlie@hotmail.com")
+            Email = new MemberEmail("someone_Charlie@hotmail.com"),
+            PasswordHash = "test-password-hash"
           },
          new Member
          {
            Name = new MemberName("John Neeson"),
-           Email = new MemberEmail("someone_John@hotmail.com")
+           Email = new MemberEmail("someone_John@hotmail.com"),
+           PasswordHash = "test-password-hash"
          });
     });
 
@@ -103,7 +109,7 @@ public class GetMemberSummariesTests : IntegrationTest
     var member = Assert.Single(result.Items);
 
     Assert.Equal("John Neeson", member.Name);
-    Assert.Equal("someone_John@hotmail.com", member.Email);
+    Assert.Equal("someone_john@hotmail.com", member.Email);
     Assert.Equal(2, result.Page);
     Assert.Equal(1, result.PageSize);
     Assert.Equal(2, result.TotalItems);
@@ -120,7 +126,8 @@ public class GetMemberSummariesTests : IntegrationTest
           new Member
           {
             Name = new MemberName("Liam Neeson"),
-            Email = new MemberEmail("someone@hotmail.com")
+            Email = new MemberEmail("someone@hotmail.com"),
+            PasswordHash = "test-password-hash"
           });
     });
 

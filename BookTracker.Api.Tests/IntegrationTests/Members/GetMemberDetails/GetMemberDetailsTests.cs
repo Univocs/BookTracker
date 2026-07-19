@@ -13,7 +13,8 @@ public class GetMemberDetailsTests : IntegrationTest
       new Member
       {
         Name = new MemberName("Liam Neeson"),
-        Email = new MemberEmail("Liam@hotmail.com")
+        Email = new MemberEmail("Liam@hotmail.com"),
+        PasswordHash = "test-password-hash"
       }
     ));
 
@@ -23,7 +24,7 @@ public class GetMemberDetailsTests : IntegrationTest
     Assert.NotNull(member);
     Assert.Equal(1, member.Id);
     Assert.Equal("Liam Neeson", member.Name);
-    Assert.Equal("Liam@hotmail.com", member.Email);
+    Assert.Equal("liam@hotmail.com", member.Email);
   }
 
   [Fact]

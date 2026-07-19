@@ -40,4 +40,11 @@ public class MemberEmailTests
     var exception = Assert.Throws<DomainException>(() => new MemberEmail("philmil_gmail.com"));
     Assert.Equal("Member email needs to contain '@'.", exception.Message);
   }
+
+  [Fact]
+  public void Member_Email_Normalizes_Value()
+  {
+    var email = new MemberEmail("  ADa@Example.Com    ");
+    Assert.Equal("ada@example.com", email.Value);
+  }
 }

@@ -42,6 +42,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 name => name.Value,
                 value => new MemberName(value))
             .HasMaxLength(MemberName.MaxLength);
+
+      member.HasIndex(current => current.Email)
+            .IsUnique();
     });
 
   }

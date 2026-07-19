@@ -12,7 +12,8 @@ public class DeleteMemberTests : IntegrationTest
       new Member
       {
         Name = new MemberName("Liam Neeson"),
-        Email = new MemberEmail("Liam@hotmail.com")
+        Email = new MemberEmail("Liam@hotmail.com"),
+        PasswordHash = "test-password-hash"
       }
     ));
 
