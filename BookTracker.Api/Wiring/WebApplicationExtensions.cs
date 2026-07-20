@@ -1,3 +1,4 @@
+using BookTracker.Api.Endpoints.Auth;
 using BookTracker.Api.Endpoints.Books;
 using BookTracker.Api.Endpoints.Members;
 using BookTracker.Api.Seeding;
@@ -9,7 +10,7 @@ public static class WebApplicationExtensions
 {
     public static WebApplication UseBookTracker(this WebApplication app)
     {
-      // This ensures that if the database does not yet exist, it is automatically created.
+        // This ensures that if the database does not yet exist, it is automatically created.
         if (app.Environment.IsDevelopment())
         {
             using var scope = app.Services.CreateScope();
@@ -24,9 +25,12 @@ public static class WebApplicationExtensions
             }
         }
 
-        app.MapBookEndpoints();
-        app.MapMemberEndpoints();
-        // BookEndpoints => Where all the mappings are located for the api
+        app.UseAuthentication(); // runs Authentication
+        app.UseAuthorization();  // then Authorizes
+
+        app.MapAuthEndpoints();   // maps Authorization endpoints
+        app.MapBookEndpoints();   // maps Book endpoints
+        app.MapMemberEndpoints(); // maps Member endpoints
 
         return app;
     }

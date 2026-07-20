@@ -5,6 +5,10 @@ using Microsoft.EntityFrameworkCore;
 using BookTracker.Api.Storage.Members;
 using Microsoft.AspNetCore.Identity;
 using BookTracker.Api.Domain.Members;
+using BookTracker.Api.Security;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace BookTracker.Api.Wiring;
 
@@ -15,6 +19,7 @@ public static class WebApplicationBuilderExtensions
         RegisterStorage(builder);           // Register database + repository
         RegisterHandlers(builder.Services); /* Register every class that uses IHandler. 
                                                   (in order to register handlers)       */
+        RegisterAuthentication(builder);
         return builder;
     }
 
@@ -28,6 +33,53 @@ public static class WebApplicationBuilderExtensions
         builder.Services.AddScoped<IPasswordHasher<Member>, PasswordHasher<Member>>();
         // Scoped = fresh AppDbContext + EfBookRepository per request
         // thrown away after -> no cross-contamination between users
+    }
+
+    private static void RegisterAuthentication(WebApplicationBuilder builder)
+    {
+        var settings = builder.Configuration // ASP.NET's unified config system
+                      .GetRequiredSection(JwtSettings.SectionName)
+                      .Get<JwtSettings>()
+                      ?? throw new InvalidOperationException("JWT settings are missing.");
+
+        if (string.IsNullOrWhiteSpace(settings.SigningKey))
+        {
+            throw new InvalidOperationException("JWT signing key is missing.");
+        }
+
+        // Registering the already-built settings object, so build once
+        builder.Services.AddSingleton(settings);
+        // JwtTokenGenerator manual registration because LoginCommandHandler will depend on it.
+        builder.Services.AddScoped<JwtTokenGenerator>();
+
+        builder.Services
+        // this app has a concept of 'logged in,' and here's the default method for checking it.
+       .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+       .AddJwtBearer(options => // configures the actual rules how to validate an incoming JWT
+        {
+            options.TokenValidationParameters =
+                new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = settings.Issuer, // reject tokens not issued by "BookTracker"
+
+                    ValidateAudience = true,
+                    ValidAudience = settings.Audience, // reject tokens not meant for "BookTracker"
+
+                    ValidateLifetime = true, // reject tokens where expiresAt has passed
+
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey =
+                        new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(settings.SigningKey)),
+                    // checks if the token was tampered with or signed elsewhere, if so FAILS
+                    // Has to be same key + same conversion as JwtTokenGenerator
+
+                    ClockSkew = TimeSpan.Zero // Clock at zero so time is exact with lifetime
+                };
+        });
+
+        builder.Services.AddAuthorization();
     }
 
     private static void RegisterHandlers(IServiceCollection services)
