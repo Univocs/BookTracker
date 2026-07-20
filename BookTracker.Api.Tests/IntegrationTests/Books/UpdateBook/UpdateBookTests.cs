@@ -13,6 +13,7 @@ public class UpdateBookTests : IntegrationTest
   [Fact]
   public async Task Update_Book_Updates_book()
   {
+    await AuthenticateAsMember();
     // var writer = factory.GetWriter(); ---> DONE BY IntegrationTest
     Writer.Seed(db => db.Books.Add(
       new Book
@@ -47,6 +48,8 @@ public class UpdateBookTests : IntegrationTest
   [Fact]
   public async Task Put_Book_NotFound_When_Member_DoesNotExist()
   {
+    await AuthenticateAsMember();
+    
     var request =
         new UpdateBookRequest
         {

@@ -11,11 +11,18 @@ public static class BookEndpoints
 {
   public static IEndpointRouteBuilder MapBookEndpoints(this IEndpointRouteBuilder app)
   {
+    // Get books are for public viewing (decision) -> no authorization needed.
     app.MapGet("/books", GetBookSummaries);
     app.MapGet("/books/{id:int}", GetBookDetails);
-    app.MapPost("/books", CreateBook);
-    app.MapPut("/books/{id:int}", UpdateBook);
-    app.MapDelete("/books/{id:int}", DeleteBook);
+
+    // Create, Edit && Delete need authorization trough valid login from member
+    app.MapPost("/books", CreateBook)
+       .RequireAuthorization();
+    app.MapPut("/books/{id:int}", UpdateBook)
+       .RequireAuthorization();
+    app.MapDelete("/books/{id:int}", DeleteBook)
+       .RequireAuthorization();
+
     return app;
   }
 

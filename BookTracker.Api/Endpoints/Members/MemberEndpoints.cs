@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using BookTracker.Api.Application.Members;
 using BookTracker.Api.Application.Members.CreateMember;
 using BookTracker.Api.Application.Members.DeleteMember;
@@ -12,11 +13,17 @@ public static class MemberEndpoints
 {
   public static IEndpointRouteBuilder MapMemberEndpoints(this IEndpointRouteBuilder app)
   {
+    // Get Members && create new member are for public viewing -> no authorization needed.
     app.MapGet("/members", GetMemberSummaries);
     app.MapGet("/members/{id:int}", GetMemberDetails);
     app.MapPost("/members", CreateMember);
-    app.MapPut("/members/{id:int}", UpdateMember);
-    app.MapDelete("/members/{id:int}", DeleteMember);
+
+    // Only authorized logged-in member can Edit && Delete
+    app.MapPut("/members/{id:int}", UpdateMember)
+       .RequireAuthorization();
+    app.MapDelete("/members/{id:int}", DeleteMember)
+       .RequireAuthorization();
+
     return app;
   }
 
@@ -51,13 +58,18 @@ public static class MemberEndpoints
     }
   }
 
-  public static async Task<IResult> UpdateMember(int id, UpdateMemberRequest request, UpdateMemberCommandHandler handler)
+  public static async Task<IResult> UpdateMember(int id,
+                                                 UpdateMemberRequest request,
+                                                 ClaimsPrincipal user,
+                                                 UpdateMemberCommandHandler handler)
   {
+    // If member is not the user Id member, forbid him from editing the member.
+    if (!IsCurrentMember(user, id)) return Results.Forbid();
+
     try
     {
       var updatedMember = await handler.Execute(id, request);
       if (!updatedMember) return Results.NotFound();
-      
       return Results.NoContent();
     }
     catch (MemberEmailAlreadyExistsException exception)
@@ -70,11 +82,24 @@ public static class MemberEndpoints
     }
   }
 
-  public static async Task<IResult> DeleteMember(int id, DeleteMemberCommandHandler handler)
+  public static async Task<IResult> DeleteMember(int id,
+                                                 ClaimsPrincipal user,
+                                                 DeleteMemberCommandHandler handler)
   {
+    if (!IsCurrentMember(user, id)) return Results.Forbid();
+
     var memberToDelete = await handler.Execute(id);
     if (!memberToDelete) return Results.NotFound();
-
     return Results.NoContent();
   }
+
+  // Only the logged-in user is allowed to touch this specific member's data
+  private static bool IsCurrentMember(ClaimsPrincipal user, int memberId)
+  {
+    var claim = user.FindFirstValue(ClaimTypes.NameIdentifier);
+    return int.TryParse(claim, out var currentMemberId) && currentMemberId == memberId;
+  }
+  // int.TryParse attempts to convert the claim string into an int. 
+  // Unlike int.Parse, which throws if the string isn't a valid number, TryParse never throws 
+  // A boolean is returned, and hands you the actual parsed number through an out parameter.
 }

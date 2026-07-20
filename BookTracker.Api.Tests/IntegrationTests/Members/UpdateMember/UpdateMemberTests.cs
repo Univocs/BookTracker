@@ -10,6 +10,8 @@ public class UpdateMemberTests : IntegrationTest
   [Fact]
   public async Task Update_Member_Updates_Member()
   {
+    var memberId = await AuthenticateAsMember();
+
     Writer.Seed(db => db.Members.Add(
       new Member
       {
@@ -25,7 +27,7 @@ public class UpdateMemberTests : IntegrationTest
       Email = "charlie@hotmail.com"
     };
 
-    var response = await Client.PutAsJsonAsync("/members/1", updateRequest);
+    var response = await Client.PutAsJsonAsync($"/members/{memberId}", updateRequest);
     await response.ShouldHaveStatusCode(HttpStatusCode.NoContent);
 
     var updatedMember = Reader.Query(db => db.Members.Find(1));
@@ -37,19 +39,28 @@ public class UpdateMemberTests : IntegrationTest
   [Fact]
   public async Task Update_Member_NotFound_When_Member_DoesNotExist()
   {
+    var memberId = await AuthenticateAsMember(); // Create member 
+    Writer.Seed(db =>                            // Delete member 
+    {
+        var member = db.Members.Find(memberId);
+        if (member is not null) db.Members.Remove(member);
+    });
+
     var updateRequest = new UpdateMemberRequest
     {
       Name = "Charlie Neeson",
       Email = "charlie@hotmail.com"
     };
 
-    var response = await Client.PutAsJsonAsync("/members/555", updateRequest);
+    var response = await Client.PutAsJsonAsync($"/members/{memberId}", updateRequest);
     await response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
   }
 
   [Fact]
   public async Task Update_Member_With_Invalid_Email_Gives_Bad_Request()
   {
+    var memberId = await AuthenticateAsMember();
+
     Writer.Seed(db => db.Members.Add(
       new Member
       {
@@ -65,7 +76,7 @@ public class UpdateMemberTests : IntegrationTest
       Email = "charlie_hotmail.com"
     };
 
-    var response = await Client.PutAsJsonAsync("/members/1", updateRequest);
+    var response = await Client.PutAsJsonAsync($"/members/{memberId}", updateRequest);
     await response.ShouldHaveStatusCode(HttpStatusCode.BadRequest);
   }
 }
