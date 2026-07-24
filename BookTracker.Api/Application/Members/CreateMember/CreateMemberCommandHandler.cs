@@ -17,7 +17,7 @@ public class CreateMemberCommandHandler(IMemberRepository memberRepository, IPas
 
     if (await memberRepository.EmailExistsAsync(email)) throw new MemberEmailAlreadyExistsException();
 
-    var newMember = new Member { Name = name, Email = email };
+    var newMember = new Member { Name = name, Email = email, Role = MemberRole.Member };
 
     newMember.PasswordHash = passwordHasher.HashPassword(newMember, request.Password);
 

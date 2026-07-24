@@ -6,6 +6,8 @@ using BookTracker.Api.Application.Members.GetMemberDetails;
 using BookTracker.Api.Application.Members.GetMemberSummaries;
 using BookTracker.Api.Application.Members.UpdateMember;
 using BookTracker.Api.Domain;
+using BookTracker.Api.Domain.Members;
+using BookTracker.Api.Security;
 
 namespace BookTracker.Api.Endpoints.Members;
 
@@ -14,8 +16,12 @@ public static class MemberEndpoints
   public static IEndpointRouteBuilder MapMemberEndpoints(this IEndpointRouteBuilder app)
   {
     // Get Members && create new member are for public viewing -> no authorization needed.
-    app.MapGet("/members", GetMemberSummaries);
-    app.MapGet("/members/{id:int}", GetMemberDetails);
+    app.MapGet("/members", GetMemberSummaries)
+      .RequireAuthorization(
+        AuthorizationPolicies.ManageMembers);
+    app.MapGet("/members/{id:int}", GetMemberDetails)
+    .RequireAuthorization(
+        AuthorizationPolicies.ManageMembers);
     app.MapPost("/members", CreateMember);
 
     // Only authorized logged-in member can Edit && Delete
@@ -64,7 +70,7 @@ public static class MemberEndpoints
                                                  UpdateMemberCommandHandler handler)
   {
     // If member is not the user Id member, forbid him from editing the member.
-    if (!IsCurrentMember(user, id)) return Results.Forbid();
+    if (!CanManageMember(user, id)) return Results.Forbid();
 
     try
     {
@@ -86,7 +92,7 @@ public static class MemberEndpoints
                                                  ClaimsPrincipal user,
                                                  DeleteMemberCommandHandler handler)
   {
-    if (!IsCurrentMember(user, id)) return Results.Forbid();
+    if (!CanManageMember(user, id)) return Results.Forbid();
 
     var memberToDelete = await handler.Execute(id);
     if (!memberToDelete) return Results.NotFound();
@@ -94,10 +100,14 @@ public static class MemberEndpoints
   }
 
   // Only the logged-in user is allowed to touch this specific member's data
-  private static bool IsCurrentMember(ClaimsPrincipal user, int memberId)
+  private static bool CanManageMember(ClaimsPrincipal user, int memberId)
   {
+    // Only true if it's the Administrator or when a member uses his own Id. (for update & delete)
+    if (user.IsInRole(nameof(MemberRole.Administrator))) return true; // Administrator
+
     var claim = user.FindFirstValue(ClaimTypes.NameIdentifier);
-    return int.TryParse(claim, out var currentMemberId) && currentMemberId == memberId;
+
+    return int.TryParse(claim, out var currentMemberId) && currentMemberId == memberId; // Member himself
   }
   // int.TryParse attempts to convert the claim string into an int. 
   // Unlike int.Parse, which throws if the string isn't a valid number, TryParse never throws 

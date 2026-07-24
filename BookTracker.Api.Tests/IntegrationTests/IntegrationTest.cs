@@ -38,7 +38,8 @@ public abstract class IntegrationTest : IDisposable
   }
 
   protected async Task<int> AuthenticateAsMember( // Simulates succesful login
-      string name = "Ada Lovelace",
+      MemberRole role = MemberRole.Member, // Administrator => 
+      string name = "Ada Lovelace",        // AuthenticateAsMember(MemberRole.Administrator);
       string email = "ada@example.com",
       string password = "analytical-engine")
   {
@@ -47,7 +48,8 @@ public abstract class IntegrationTest : IDisposable
     {
       Name = new MemberName(name),
       Email = new MemberEmail(email),
-      PasswordHash = string.Empty
+      PasswordHash = string.Empty,
+      Role = role
     };
 
     // We hash the empty password of member with the passwordHasher

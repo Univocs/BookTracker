@@ -9,6 +9,7 @@ using BookTracker.Api.Security;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Security.Claims;
 
 namespace BookTracker.Api.Wiring;
 
@@ -75,11 +76,21 @@ public static class WebApplicationBuilderExtensions
                     // checks if the token was tampered with or signed elsewhere, if so FAILS
                     // Has to be same key + same conversion as JwtTokenGenerator
 
+                    NameClaimType = ClaimTypes.Name,
+                    RoleClaimType = ClaimTypes.Role,
+
                     ClockSkew = TimeSpan.Zero // Clock at zero so time is exact with lifetime
                 };
         });
 
-        builder.Services.AddAuthorization();
+        builder.Services.AddAuthorization(options =>
+        {
+            options.AddPolicy(AuthorizationPolicies.ManageBooks,
+                policy => policy.RequireRole(nameof(MemberRole.Administrator)));
+
+            options.AddPolicy(AuthorizationPolicies.ManageMembers,
+                policy => policy.RequireRole(nameof(MemberRole.Administrator)));
+        });
     }
 
     private static void RegisterHandlers(IServiceCollection services)

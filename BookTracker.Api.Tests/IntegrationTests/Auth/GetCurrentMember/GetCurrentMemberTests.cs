@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using BookTracker.Api.Application.Auth.GetCurrentMember;
 using BookTracker.Api.Application.Auth.Login;
+using BookTracker.Api.Application.Members.CreateMember;
 using BookTracker.Api.Domain.Members;
 using Microsoft.AspNetCore.Identity;
 
@@ -76,5 +77,18 @@ public class GetCurrentMemberTests : IntegrationTest
 
     await response.ShouldHaveStatusCode(
         HttpStatusCode.Unauthorized);
+  }
+
+  [Fact]
+  public async Task GetCurrentMemberReturnsRole()
+  {
+    await AuthenticateAsMember(MemberRole.Administrator);
+
+    var response = await Client.GetAsync("/auth/me");
+
+    var member = await response.ReadJsonAs<CurrentMemberResponse>(
+                                           HttpStatusCode.OK);
+
+    Assert.Equal("Administrator", member.Role);
   }
 }

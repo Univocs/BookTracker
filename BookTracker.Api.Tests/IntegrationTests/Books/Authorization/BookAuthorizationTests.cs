@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using BookTracker.Api.Application.Books.CreateBook;
 using BookTracker.Api.Application.Books.UpdateBook;
+using BookTracker.Api.Application.Members.UpdateMember;
 using BookTracker.Api.Domain.Books;
 
 namespace BookTracker.Api.Tests.IntegrationTests.Books.Authorization;
@@ -25,7 +26,7 @@ public class BookAuthorizationTests : IntegrationTest
     Assert.Equal(0, count); // Did it save any books?
   }
 
-//-------------------------------------------------------------------
+  //-------------------------------------------------------------------
 
   [Fact]
   public async Task Update_Book_Requires_Authentication()
@@ -48,7 +49,7 @@ public class BookAuthorizationTests : IntegrationTest
     await response.ShouldHaveStatusCode(HttpStatusCode.Unauthorized);
   }
 
-//-------------------------------------------------------------------
+  //-------------------------------------------------------------------
 
   [Fact]
   public async Task Delete_Book_Requires_Authentication()
@@ -64,7 +65,7 @@ public class BookAuthorizationTests : IntegrationTest
     await deleted.ShouldHaveStatusCode(HttpStatusCode.Unauthorized);
   }
 
-//-------------------------------------------------------------------
+  //-------------------------------------------------------------------
 
   [Fact]
   public async Task Get_Books_Does_Not_Require_Authentication()
@@ -73,7 +74,7 @@ public class BookAuthorizationTests : IntegrationTest
     await response.ShouldHaveStatusCode(HttpStatusCode.OK);
   }
 
-//-------------------------------------------------------------------
+  //-------------------------------------------------------------------
 
   [Fact]
   public async Task Get_BookById_Does_Not_Require_Authentication()
@@ -87,5 +88,55 @@ public class BookAuthorizationTests : IntegrationTest
 
     var response = await Client.GetAsync("/books/1");
     await response.ShouldHaveStatusCode(HttpStatusCode.OK);
+  }
+
+  [Fact]
+  public async Task RegularMemberCannotCreateBook()
+  {
+    await AuthenticateAsMember();
+
+    var request =
+        new CreateBookRequest
+        {
+          Title = "Dune",
+          Author = "Frank Herbert",
+          Year = 1965
+        };
+
+    var response =
+        await Client.PostAsJsonAsync(
+            "/books",
+            request);
+
+    await response.ShouldHaveStatusCode(
+        HttpStatusCode.Forbidden);
+
+    var count =
+        Reader.Query(db =>
+            db.Books.Count());
+
+    Assert.Equal(0, count);
+  }
+
+  [Fact]
+  public async Task Regular_Member_Cannot_Edit_Book()
+  {
+    await AuthenticateAsMember();
+
+    var request = new UpdateBookRequest
+    {
+      Title = "Dune Messiah",
+      Author = "Frank Herbert",
+      Year = 1969
+    };
+
+    var response = await Client.PutAsJsonAsync("/books/1", request);
+    await response.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
+
+    var count =
+        Reader.Query(db =>
+            db.Books.Count());
+
+    Assert.Equal(0, count);
   }
 }

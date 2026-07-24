@@ -45,6 +45,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
       member.HasIndex(current => current.Email)
             .IsUnique();
+
+      member.Property(current => current.Role)
+            .HasConversion<string>()
+            .HasMaxLength(50); // otherwise default max
     });
 
   }

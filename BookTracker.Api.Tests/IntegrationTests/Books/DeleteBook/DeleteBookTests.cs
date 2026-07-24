@@ -1,5 +1,6 @@
 using System.Net;
 using BookTracker.Api.Domain.Books;
+using BookTracker.Api.Domain.Members;
 
 namespace BookTracker.Api.Tests.IntegrationTests.Books.DeleteBook;
 
@@ -11,7 +12,7 @@ public class DeleteBookTests : IntegrationTest
   [Fact]
   public async Task Delete_Book_Deletes_Book()
   {
-    await AuthenticateAsMember();
+    await AuthenticateAsMember(MemberRole.Administrator);
     // var writer = factory.GetWriter(); ---> DONE BY IntegrationTest
     Writer.Seed(db => db.Books.Add(
       new Book
@@ -37,7 +38,7 @@ public class DeleteBookTests : IntegrationTest
   [Fact]
   public async Task Delete_Book_NotFound_When_DoesNotExist()
   {
-    await AuthenticateAsMember();
+    await AuthenticateAsMember(MemberRole.Administrator);
     // var client = factory.CreateClient(); ---> DONE BY IntegrationTest
     var response = await Client.DeleteAsync("/books/9999");
     // Uses HttpResponseAssertions

@@ -11,22 +11,15 @@ public class GetMemberSummariesTests : IntegrationTest
   [Fact]
   public async Task Get_Member_Summaries_Returns_Members_With_Paging()
   {
-    Writer.Seed(db => db.Members.Add(
-      new Member
-      {
-        Name = new MemberName("Liam Neeson"),
-        Email = new MemberEmail("Liam@hotmail.com"),
-        PasswordHash = "test-password-hash"
-      }
-    ));
+    await AuthenticateAsMember(MemberRole.Administrator);
 
     var response = await Client.GetAsync("/members");
     var allMembers = await response.ReadJsonAs<PagedResult<MemberSummary>>(HttpStatusCode.OK);
     Assert.NotNull(allMembers);
     var membersInfo = Assert.Single(allMembers.Items);
 
-    Assert.Equal("Liam Neeson", membersInfo.Name);
-    Assert.Equal("liam@hotmail.com", membersInfo.Email);
+    Assert.Equal("Ada Lovelace", membersInfo.Name);
+    Assert.Equal("ada@example.com", membersInfo.Email);
     Assert.Equal(1, allMembers.Page);
     Assert.Equal(10, allMembers.PageSize);
     Assert.Equal(1, allMembers.TotalItems);
@@ -36,6 +29,7 @@ public class GetMemberSummariesTests : IntegrationTest
   [Fact]
   public async Task Get_Member_Summaries_Can_Search_By_Name()
   {
+    await AuthenticateAsMember(MemberRole.Administrator);
     Writer.Seed(db => db.Members.AddRange(
       new Member
       {
@@ -58,6 +52,7 @@ public class GetMemberSummariesTests : IntegrationTest
   [Fact]
   public async Task Get_Member_Summaries_Can_Search_By_Email()
   {
+    await AuthenticateAsMember(MemberRole.Administrator);
     Writer.Seed(db => db.Members.AddRange(
      new Member
      {
@@ -80,6 +75,7 @@ public class GetMemberSummariesTests : IntegrationTest
   [Fact]
   public async Task Get_Member_Summaries_Applies_Paging_After_Search()
   {
+    await AuthenticateAsMember(MemberRole.Administrator);
     Writer.Seed(db =>
     {
       db.Members.AddRange(
@@ -116,10 +112,11 @@ public class GetMemberSummariesTests : IntegrationTest
     Assert.Equal(2, result.TotalPages);
   }
 
-  
+
   [Fact]
   public async Task Get_Member_Summaries_Returns_Empty_List_When_Search_NoResults()
   {
+    await AuthenticateAsMember(MemberRole.Administrator);
     Writer.Seed(db =>
     {
       db.Members.AddRange(
@@ -139,12 +136,12 @@ public class GetMemberSummariesTests : IntegrationTest
   }
 
   [Fact]
-    public void BookTitle_And_BookAuthor_RejectsNull()
-    {
-        var nameException = Assert.Throws<DomainException>(() => new MemberName(null!));
-        var emailException = Assert.Throws<DomainException>(() => new MemberEmail(null!));
+  public void BookTitle_And_BookAuthor_RejectsNull()
+  {
+    var nameException = Assert.Throws<DomainException>(() => new MemberName(null!));
+    var emailException = Assert.Throws<DomainException>(() => new MemberEmail(null!));
 
-        Assert.Equal("Member name is required.", nameException.Message);
-        Assert.Equal("Member email is required.", emailException.Message);
-    }
+    Assert.Equal("Member name is required.", nameException.Message);
+    Assert.Equal("Member email is required.", emailException.Message);
+  }
 }

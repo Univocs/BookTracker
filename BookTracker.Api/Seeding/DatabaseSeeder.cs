@@ -1,4 +1,7 @@
+using BookTracker.Api.Domain.Members;
+using BookTracker.Api.Security;
 using BookTracker.Api.Storage;
+using Microsoft.AspNetCore.Identity;
 
 namespace BookTracker.Api.Seeding;
 
@@ -25,4 +28,39 @@ public static class DatabaseSeeder
     dbContext.Books.AddRange(books);
     dbContext.SaveChanges();
   }
-}   
+
+  public static void SeedAdministrator(AppDbContext dbContext,
+                                       IConfiguration configuration,
+                                       IPasswordHasher<Member> passwordHasher)
+  {
+    // Load the admin settings (name, email, password) from config
+    var settings = configuration.GetSection(DevelopmentAdminSettings.SectionName)
+                         .Get<DevelopmentAdminSettings>();
+
+    // No settings or no password configured? Don't seed an admin.
+    if (settings is null || string.IsNullOrWhiteSpace(settings.Password)) return;
+
+    var email = new MemberEmail(settings.Email);
+
+    // Already seeded before? Don't create a second admin.
+    var exists = dbContext.Members.Any(member => (string)member.Email == email.Value);
+    if (exists) return;
+
+    // Build the admin manually (not through the normal registration flow)
+    var administrator = new Member
+    {
+      Name = new MemberName(settings.Name),
+      Email = email, // settings.email
+      PasswordHash = string.Empty,  // Filled in below
+      Role = MemberRole.Administrator
+    };
+
+    // Turn the plain-text password from config into a proper hash
+    administrator.PasswordHash = passwordHasher.HashPassword(
+                                                administrator,
+                                                settings.Password);
+    // Save the new admin to the database                                            
+    dbContext.Members.Add(administrator);
+    dbContext.SaveChanges();
+  }
+}

@@ -8,4 +8,5 @@ public class Member
 
   // Entity does not contain password property (in CreateMemberRequest), only hash!
   public string PasswordHash { get; set; } = string.Empty;
+  public MemberRole Role { get; set; } = MemberRole.Member; 
 }

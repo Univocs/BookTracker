@@ -17,7 +17,8 @@ public class JwtTokenGenerator(JwtSettings settings)
     { // The payload or facts about the member readable inside the token
       new(ClaimTypes.NameIdentifier, member.Id.ToString()), // claims always strings
       new(ClaimTypes.Name, member.Name.Value),
-      new(ClaimTypes.Email, member.Email.Value)
+      new(ClaimTypes.Email, member.Email.Value),
+      new(ClaimTypes.Role, member.Role.ToString())
     };
 
     // SymmetricSecurityKey needs SigningKey to be raw bytes, not string

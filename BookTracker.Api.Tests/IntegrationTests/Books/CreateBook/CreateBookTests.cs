@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using BookTracker.Api.Application.Books.CreateBook;
 using BookTracker.Api.Domain.Books;
+using BookTracker.Api.Domain.Members;
 
 namespace BookTracker.Api.Tests.IntegrationTests.Books.CreateBook;
 
@@ -13,7 +14,7 @@ public class CreateBookTests : IntegrationTest
   [Fact]
   public async Task Post_Book_Creates_Book()
   {
-    await AuthenticateAsMember();
+    await AuthenticateAsMember(MemberRole.Administrator);
 
     var request = new CreateBookRequest
     {
@@ -44,7 +45,7 @@ public class CreateBookTests : IntegrationTest
   [Fact]
   public async Task PostBookReturnsBadRequestWhenTitleIsWhitespace()
   {
-    await AuthenticateAsMember();
+    await AuthenticateAsMember(MemberRole.Administrator);
 
     var request =
         new CreateBookRequest

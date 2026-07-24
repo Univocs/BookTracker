@@ -114,4 +114,36 @@ public class CreateMemberTests : IntegrationTest
     var responseMember2 = await Client.PostAsJsonAsync("/members", posterMember2);
     await responseMember2.ShouldHaveStatusCode(HttpStatusCode.Conflict);
   }
+
+  [Fact]
+  public async Task CreateMemberCreatesRegularMember()
+  {
+    var request =
+        new CreateMemberRequest
+        {
+          Name = "Grace Hopper",
+          Email = "grace@example.com",
+          Password = "debugging-moth"
+        };
+
+    var response =
+        await Client.PostAsJsonAsync(
+            "/members",
+            request);
+
+    var created =
+        await response
+            .ReadJsonAs<CreateMemberResponse>(
+                HttpStatusCode.Created);
+
+    var member =
+        Reader.Query(db =>
+            db.Members.Find(created.Id));
+
+    Assert.NotNull(member);
+
+    Assert.Equal(
+        MemberRole.Member,
+        member.Role);
+  }
 }
