@@ -83,14 +83,7 @@ public static class WebApplicationBuilderExtensions
                 };
         });
 
-        builder.Services.AddAuthorization(options =>
-        {
-            options.AddPolicy(AuthorizationPolicies.ManageBooks,
-                policy => policy.RequireRole(nameof(MemberRole.Administrator)));
-
-            options.AddPolicy(AuthorizationPolicies.ManageMembers,
-                policy => policy.RequireRole(nameof(MemberRole.Administrator)));
-        });
+        builder.Services.AddAuthorization();
     }
 
     private static void RegisterHandlers(IServiceCollection services)

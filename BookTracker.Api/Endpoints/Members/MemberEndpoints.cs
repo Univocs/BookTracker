@@ -6,8 +6,6 @@ using BookTracker.Api.Application.Members.GetMemberDetails;
 using BookTracker.Api.Application.Members.GetMemberSummaries;
 using BookTracker.Api.Application.Members.UpdateMember;
 using BookTracker.Api.Domain;
-using BookTracker.Api.Domain.Members;
-using BookTracker.Api.Security;
 
 namespace BookTracker.Api.Endpoints.Members;
 
@@ -17,11 +15,9 @@ public static class MemberEndpoints
   {
     // Get Members && create new member are for public viewing -> no authorization needed.
     app.MapGet("/members", GetMemberSummaries)
-      .RequireAuthorization(
-        AuthorizationPolicies.ManageMembers);
+      .RequireAuthorization();
     app.MapGet("/members/{id:int}", GetMemberDetails)
-    .RequireAuthorization(
-        AuthorizationPolicies.ManageMembers);
+    .RequireAuthorization();
     app.MapPost("/members", CreateMember);
 
     // Only authorized logged-in member can Edit && Delete
@@ -33,20 +29,42 @@ public static class MemberEndpoints
     return app;
   }
 
-  public static async Task<IResult> GetMemberSummaries([AsParameters] GetMemberSummariesRequest request, GetMemberSummariesQueryHandler query)
+  public static async Task<IResult> GetMemberSummaries([AsParameters]
+                                                       GetMemberSummariesRequest request,
+                                                       ClaimsPrincipal principal,
+                                                       GetMemberSummariesQueryHandler query)
   {
-    var members = await query.Execute(request);
-    return Results.Ok(members);
+    try
+    {
+      var actor = principal.ToActor();
+      var members = await query.Execute(actor, request);
+      return Results.Ok(members);
+    }
+    catch (ForbiddenOperationException)
+    {
+      return Results.Forbid();
+    }
   }
 
-  public static async Task<IResult> GetMemberDetails(int id, GetMemberDetailsQueryHandler query)
+  public static async Task<IResult> GetMemberDetails(int id,
+                                                     ClaimsPrincipal principal,
+                                                     GetMemberDetailsQueryHandler query)
   {
-    var member = await query.Execute(id);
-    if (member is null) return Results.NotFound();
-    return Results.Ok(member);
+    try
+    {
+      var actor = principal.ToActor();
+      var member = await query.Execute(actor, id);
+      if (member is null) return Results.NotFound();
+      return Results.Ok(member);
+    }
+    catch (ForbiddenOperationException)
+    {
+      return Results.Forbid();
+    }
   }
 
-  public static async Task<IResult> CreateMember(CreateMemberRequest request, CreateMemberCommandHandler handler)
+  public static async Task<IResult> CreateMember(CreateMemberRequest request,
+                                                 CreateMemberCommandHandler handler)
   {
     try
     {
@@ -66,17 +84,19 @@ public static class MemberEndpoints
 
   public static async Task<IResult> UpdateMember(int id,
                                                  UpdateMemberRequest request,
-                                                 ClaimsPrincipal user,
+                                                 ClaimsPrincipal principal,
                                                  UpdateMemberCommandHandler handler)
   {
-    // If member is not the user Id member, forbid him from editing the member.
-    if (!CanManageMember(user, id)) return Results.Forbid();
-
     try
     {
-      var updatedMember = await handler.Execute(id, request);
+      var actor = principal.ToActor();
+      var updatedMember = await handler.Execute(actor, id, request);
       if (!updatedMember) return Results.NotFound();
       return Results.NoContent();
+    }
+    catch (ForbiddenOperationException)
+    {
+      return Results.Forbid();
     }
     catch (MemberEmailAlreadyExistsException exception)
     {
@@ -89,27 +109,24 @@ public static class MemberEndpoints
   }
 
   public static async Task<IResult> DeleteMember(int id,
-                                                 ClaimsPrincipal user,
+                                                 ClaimsPrincipal principal,
                                                  DeleteMemberCommandHandler handler)
   {
-    if (!CanManageMember(user, id)) return Results.Forbid();
-
-    var memberToDelete = await handler.Execute(id);
-    if (!memberToDelete) return Results.NotFound();
-    return Results.NoContent();
+    try
+    {
+      var actor = principal.ToActor();
+      var memberToDelete = await handler.Execute(actor, id);
+      if (!memberToDelete) return Results.NotFound();
+      return Results.NoContent();
+    }
+    catch (ForbiddenOperationException)
+    {
+      return Results.Forbid();
+    }
+    catch (DomainException exception)
+    {
+      return Results.BadRequest(
+          new { error = exception.Message });
+    }
   }
-
-  // Only the logged-in user is allowed to touch this specific member's data
-  private static bool CanManageMember(ClaimsPrincipal user, int memberId)
-  {
-    // Only true if it's the Administrator or when a member uses his own Id. (for update & delete)
-    if (user.IsInRole(nameof(MemberRole.Administrator))) return true; // Administrator
-
-    var claim = user.FindFirstValue(ClaimTypes.NameIdentifier);
-
-    return int.TryParse(claim, out var currentMemberId) && currentMemberId == memberId; // Member himself
-  }
-  // int.TryParse attempts to convert the claim string into an int. 
-  // Unlike int.Parse, which throws if the string isn't a valid number, TryParse never throws 
-  // A boolean is returned, and hands you the actual parsed number through an out parameter.
 }
