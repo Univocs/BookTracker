@@ -8,14 +8,14 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
     {
         policy
-            .AllowAnyOrigin()
+            .WithOrigins("http://localhost:5173")
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
 });
 
 var app = builder.Build();
-app.UseBookTracker();
 app.UseCors();
+app.UseBookTracker();
 app.Run();
 public partial class Program;
