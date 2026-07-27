@@ -27,7 +27,23 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
               author => author.Value,
               value => new AuthorName(value))
           .HasMaxLength(AuthorName.MaxLength);
-    });
+
+      book.Property(book => book.Version) // 
+          .IsConcurrencyToken(); // EFCore checks if token cahnged during update, deletion
+    });                          // If changed -> throws 
+
+  /*SQL of IsConcurrencyToken => 
+    UPDATE Books
+    SET
+        Title = @title,
+        Author = @author,
+        Year = @year,
+        Version = @newVersion --> The yet to be updated original version.
+    WHERE
+        Id = @id
+        AND Version = @expectedVersion; --> if version matches the expectedVersion, update!!
+                                            if not --> throws DbUpdateConcurrencyException
+*/
 //--------------------------------------------------------------
     modelBuilder.Entity<Member>(member =>
     {
