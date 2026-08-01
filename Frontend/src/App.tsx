@@ -1,15 +1,14 @@
 import { Link, Route, Routes } from "react-router-dom";
+import { AccountPage } from "./auth/AccountPage";
+import { LoginPage } from "./auth/LoginPage";
+import { LogoutButton } from "./auth/LogoutButton";
 
-// Link   = klikbare navigatielink, geen page reload
-// Route  = koppelt 1 URL-pad aan 1 component
-// Routes = kiest welke Route past bij de huidige URL
+// </Link>   = klikbare navigatielink, geen page reload
+// </Route>  = koppelt 1 URL-pad aan 1 component
+// </Routes> = kiest welke Route past bij de huidige URL
 
-function HomePage() {                // Component
+function HomePage() {
   return <h1>Book Tracker</h1>;
-}
-
-function AboutPage() {               // Component
-  return <h1>About Book Tracker</h1>;
 }
 
 export default function App() {
@@ -17,12 +16,15 @@ export default function App() {
     <>
       <nav>
         <Link to="/">Home</Link>{" "}
-        <Link to="/about">About</Link>
+        <Link to="/login">Log in</Link>{" "}
+        <Link to="/account">Account</Link>{" "}
+        <LogoutButton />
       </nav>
 
-      <Routes> 
+      <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/about" element={<AboutPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/account" element={<AccountPage />} />
       </Routes>
     </>
   );
