@@ -1,4 +1,4 @@
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { getBooks } from "./booksApi";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type { SubmitEvent } from "react";
@@ -62,57 +62,58 @@ export function BookListPage() {
         return <p>Could not load the books. Is the API running?</p>;
     }
 
-    const result = booksQuery.data;       // After both checks, data is garanteed (narrowing)
+    const books = booksQuery.data;       // After both checks, data is garanteed (narrowing)
 
     return (
         <main>
             <h1>Books</h1>
 
-            <form key={search} onSubmit={handleSearch}>
-                <label>
+            <form key={search} onSubmit={handleSearch} /* When search key changes, new input overwrites empty */>
+                <label                               /* for instance when you go back and old search is reset */>
                     Search by title or author
-                    <input
-                        type="search"
-                        name="search"
-                        defaultValue={search}
+                    {" "}<input
+                        type="search"         // Tells browser this is a search field.
+                        name="search"         // This is what makes FormData work in handleSearch function.
+                        defaultValue={search} // React sets value once, DOM manages it on every keystroke.
                     />
                 </label>
                 <button type="submit">Search</button>
             </form>
 
-            {result.items.length === 0 ? (
+            {books.items.length === 0 ? (   // If ammount of books === 0, render "No books Found"
                 <p>No books found.</p>
-            ) : (
-                <ul>
-                    {result.items.map((book) => (
-                        <li key={book.id}>
-                            <strong>{book.title}</strong> by {book.author}
+            ) : (                            // else render the list
+                <ul /* unordened list */>
+                    {books.items.map((book) => (
+                        <li key={book.id} /* list item */ >
+                            <Link to={`/books/${book.id}`} /* link to the bookdetails for specific book */> 
+                                <strong>{book.title}</strong> by {book.author}
+                            </Link>
                         </li>
                     ))}
                 </ul>
             )}
-
-            <p>
-                Page {result.page} of {result.totalPages}. {result.totalItems} books found.
+            <p /* Shows page information */ >
+                Page {books.page} of {books.totalPages} - {books.totalItems} books found.
             </p>
 
             <button
                 type="button"
-                onClick={() => setPage(result.page - 1)}
-                disabled={result.page <= 1 || booksQuery.isFetching}
+                onClick={() => setPage(books.page - 1)}              // page - 1 goes back a page
+                disabled={books.page <= 1 || booksQuery.isFetching}  // button disabled if <=1 or fetching
             >
                 Previous
             </button>{" "}
 
             <button
                 type="button"
-                onClick={() => setPage(result.page + 1)}
-                disabled={result.page >= result.totalPages || booksQuery.isFetching}
-            >
+                onClick={() => setPage(books.page + 1)}               // page + 1 goes up a page
+                disabled={books.page >= books.totalPages || booksQuery.isFetching}
+                                                                       /* button disabled >= totalpages or fetching */>
                 Next
             </button>
 
-            {booksQuery.isFetching && <p>Updating books...</p>}
+            {booksQuery.isFetching && <p /* if fetching, show ---> */>Updating books...</p>}
         </main>
     );
 }

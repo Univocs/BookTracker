@@ -12,3 +12,11 @@ export type GetBooksRequest = {
     pageSize: number;
     search: string;
 }
+
+export type BookDetails = {
+    id: number
+    title: string;
+    author: string;
+    year: number;
+    version: string;
+}

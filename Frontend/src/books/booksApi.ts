@@ -1,6 +1,6 @@
 import { apiRequest } from "../api";
 import type { PagedResult } from "../types";
-import type { BookSummary, GetBooksRequest } from "./types";
+import type { BookDetails, BookSummary, GetBooksRequest } from "./types";
 
 export function getBooks(request: GetBooksRequest) {
     const parameters = new URLSearchParams({ // Builds safe query strings
@@ -19,3 +19,7 @@ export function getBooks(request: GetBooksRequest) {
 
 // For instance: getBooks({ page: 1, pageSize: 10, search: "dune" });
 //     builds -> GET /books?page=2&pageSize=10&search=dune
+
+export function getBook(bookId: number){
+    return apiRequest<BookDetails>(`/books/${bookId}`);
+}
