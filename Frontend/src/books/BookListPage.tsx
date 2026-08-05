@@ -2,6 +2,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { getBooks } from "./booksApi";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type { SubmitEvent } from "react";
+import { CreateBookLink } from "./CreateBookLink";
 
 const pageSize = 10;
 
@@ -21,7 +22,7 @@ export function BookListPage() {
 
 
     // Get books and cache them in "books"
-    const booksQuery = useQuery({
+    const booksQuery = useQuery({  // useQuery actually check if booklist is outdated to refetch
         queryKey: ["books", { page, pageSize, search }],
         queryFn: () => getBooks({ page, pageSize, search }),
         placeholderData: keepPreviousData, // Keeps 1st page until switch to 2nd
@@ -67,6 +68,7 @@ export function BookListPage() {
     return (
         <main>
             <h1>Books</h1>
+            <CreateBookLink />
 
             <form key={search} onSubmit={handleSearch} /* When search key changes, new input overwrites empty */>
                 <label                               /* for instance when you go back and old search is reset */>
@@ -86,7 +88,7 @@ export function BookListPage() {
                 <ul /* unordened list */>
                     {books.items.map((book) => (
                         <li key={book.id} /* list item */ >
-                            <Link to={`/books/${book.id}`} /* link to the bookdetails for specific book */> 
+                            <Link to={`/books/${book.id}`} /* link to the bookdetails for specific book */>
                                 <strong>{book.title}</strong> by {book.author}
                             </Link>
                         </li>
