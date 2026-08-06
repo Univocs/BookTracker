@@ -6,6 +6,7 @@ import { BookListPage } from "./books/BookListPage";
 import { BookDetailsPage } from "./books/BookDetailsPage";
 import { RequireAdministrator } from "./auth/RequireAdministrator";
 import { BookCreatePage } from "./books/BookCreatePage";
+import { BookEditPage } from "./books/BookEditPage";
 
 // </Link>   = klikbare navigatielink, geen page reload
 // </Route>  = koppelt 1 URL-pad aan 1 component
@@ -33,6 +34,7 @@ export default function App() {
         <Route path="/books" element={<BookListPage />} />
         <Route element={<RequireAdministrator />}>
           <Route path="/books/new" element={<BookCreatePage />} />
+          <Route path="/books/:bookId/edit" element={<BookEditPage />} />
         </Route>
         <Route path="/books/:bookId" element={<BookDetailsPage />} />
 

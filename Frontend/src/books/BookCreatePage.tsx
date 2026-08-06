@@ -22,14 +22,14 @@ export function BookCreatePage() {
     // Submits when you hit Enter or click "Search"
     function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
         event.preventDefault(); // prevents reload of page so there's no state loss
-        setFormError(null);     // clears out any old error message before trying again.
+        setFormError(null);     // clears out old error message before trying again.
 
         // event.currentTarget = the <form> element; FormData reads its field values at submit time
         const formData = new FormData(event.currentTarget);
-        const title = formData.get("title")?.toString().trim() ?? "";    // gets value from title input
-        const author = formData.get("author")?.toString().trim() ?? "";  // gets value from author input
-        const yearValue = formData.get("year")?.toString().trim() ?? ""; // gets value from year input
-        const year = Number(yearValue);                                  // converted to an actual number
+        const title = formData.get("title")?.toString().trim() ?? "";    // get input value title
+        const author = formData.get("author")?.toString().trim() ?? "";  // get input value author
+        const yearValue = formData.get("year")?.toString().trim() ?? ""; // get input value year
+        const year = Number(yearValue);                                  // convert year to int
 
         // Checks If anything's missing or year isn't a whole number, stop with error message
         if (!title || !author || !yearValue || !Number.isInteger(year)) {

@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
 import { getBook } from "./booksApi";
 import { ApiError } from "../api";
+import { EditBookLink } from "./EditBookLink";
 
 function readBookId(value: string | undefined) {
     const bookId = Number(value);
@@ -9,11 +10,11 @@ function readBookId(value: string | undefined) {
 }
 
 export function BookDetailsPage() {
-    const { bookId: bookIdParameter } = useParams(); // hands back booknumber from URL
+    const { bookId: bookIdParameter } = useParams(); // hands back booknumber from URL as a string
     const bookId = readBookId(bookIdParameter); // for instance /books/:bookId -> /book/42
 
     const bookQuery = useQuery({
-        queryKey: ["books", "detail", bookId], // identify 1 specific book with seperate caches
+        queryKey: ["books", "detail", bookId], // reuse cached book in "books"||"detail" instead of refetching
         queryFn: () => {
             if (bookId === null) { throw new Error("invalid book id"); }
             return getBook(bookId);            // if it doesn't throw, return bookId
@@ -33,9 +34,9 @@ export function BookDetailsPage() {
 
     if (bookQuery.isPending) { return <p>Loading book...</p> }
 
-    const notFound = bookQuery.error instanceof ApiError && bookQuery.error.status === 404;
+    const querynotFound = bookQuery.error instanceof ApiError && bookQuery.error.status === 404;
 
-    if (notFound) {     // This book genuinely doesn't exist - 404
+    if (querynotFound) {     // This book genuinely doesn't exist - 404
         return (
             <main>
                 <h1>Book not found</h1>
@@ -63,6 +64,7 @@ export function BookDetailsPage() {
             <h1>{book.title}</h1>
             <p>Author: {book.author}</p>
             <p>Year: {book.year}</p>
+            <EditBookLink bookId={book.id} />
         </main>
     );
 }

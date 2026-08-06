@@ -26,6 +26,7 @@ export function useCurrentMember() {
     // useEffect -> () => {function}, [dependancy array]
     // When something in the dependancy array [unauthorized] changes, run the function! 
     // A consequence of rendering rather then running it during rendering.
+    
     useEffect(() => {
         if (unauthorized) removeAccessToken(); // remove from storage.
     }, [unauthorized]);   // if unauthorized flips true, run the function
