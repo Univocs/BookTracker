@@ -8,15 +8,17 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { getCurrentMember } from "./authApi";
-import { getAccessToken, removeAccessToken } from "./tokenStorage";
+import { removeAccessToken, useAccessToken } from "./tokenStorage";
 import { ApiError } from "../api";
 import { useEffect } from "react";
 
 export function useCurrentMember() {
+    const accessToken = useAccessToken();
+
     const query = useQuery({          // useQuery to fetch current member 
         queryKey: ["current-member"], // Lets multiple components share same cached key
         queryFn: getCurrentMember,
-        enabled: getAccessToken() !== null, // queryFn disables if this is false, else run it
+        enabled: accessToken !== null, // queryFn disables if this is false, else run it
         retry: false,                       // Retry turned off, because waste of effort
     });
 
